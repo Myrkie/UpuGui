@@ -63,7 +63,7 @@ namespace Mono.Options
 
         protected override void InsertItem(int index, Option item)
         {
-            InsertItem(index, item);
+            base.InsertItem(index, item);
             AddImpl(item);
         }
 
@@ -112,7 +112,7 @@ namespace Mono.Options
 
         public OptionSet Add(Option option)
         {
-            Add(option);
+            base.Add(option);
             return this;
         }
 

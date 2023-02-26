@@ -111,7 +111,7 @@ namespace UpuConsole
             {
                 if (register)
                     RegisterShellHandler("Unity package file", "Unpack", "Unpack here",
-                        string.Format("\"{0}\" \"%L\"", Assembly.GetEntryAssembly().Location));
+                        string.Format("\"{0}\" \"--input=%L\"", System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName));
                 else
                     UnregisterShellHandler("Unity package file", "Unpack");
                 return true;

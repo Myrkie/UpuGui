@@ -51,7 +51,7 @@ namespace UpuGui
             DragEnter += Form1_DragEnter;
             DragDrop += Form1_DragDrop;
             var upuGui = this;
-            var str = upuGui.Text + (object) " " + (object) Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            var str = upuGui.Text + $" {Assembly.GetExecutingAssembly().GetName().Version}";
             upuGui.Text = str;
         }
 
@@ -254,6 +254,7 @@ namespace UpuGui
 
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UpuGui));
             this.saveToFolderDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.btnUnpack = new System.Windows.Forms.Button();
             this.btnSelectInputFile = new System.Windows.Forms.Button();
@@ -272,10 +273,12 @@ namespace UpuGui
             // btnUnpack
             // 
             this.btnUnpack.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnUnpack.Image = ((System.Drawing.Image)(resources.GetObject("btnUnpack.Image")));
             this.btnUnpack.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnUnpack.Location = new System.Drawing.Point(146, 343);
+            this.btnUnpack.Location = new System.Drawing.Point(170, 429);
+            this.btnUnpack.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnUnpack.Name = "btnUnpack";
-            this.btnUnpack.Size = new System.Drawing.Size(128, 30);
+            this.btnUnpack.Size = new System.Drawing.Size(149, 38);
             this.btnUnpack.TabIndex = 3;
             this.btnUnpack.Text = "Unpack now";
             this.btnUnpack.UseVisualStyleBackColor = true;
@@ -284,10 +287,12 @@ namespace UpuGui
             // btnSelectInputFile
             // 
             this.btnSelectInputFile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnSelectInputFile.Image = ((System.Drawing.Image)(resources.GetObject("btnSelectInputFile.Image")));
             this.btnSelectInputFile.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnSelectInputFile.Location = new System.Drawing.Point(12, 343);
+            this.btnSelectInputFile.Location = new System.Drawing.Point(14, 429);
+            this.btnSelectInputFile.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnSelectInputFile.Name = "btnSelectInputFile";
-            this.btnSelectInputFile.Size = new System.Drawing.Size(128, 30);
+            this.btnSelectInputFile.Size = new System.Drawing.Size(149, 38);
             this.btnSelectInputFile.TabIndex = 6;
             this.btnSelectInputFile.Text = "Select Input File";
             this.btnSelectInputFile.UseVisualStyleBackColor = true;
@@ -301,9 +306,11 @@ namespace UpuGui
             this.groupBox.Controls.Add(this.btnDeselectAll);
             this.groupBox.Controls.Add(this.btnSelectAll);
             this.groupBox.Controls.Add(this.treeViewContents);
-            this.groupBox.Location = new System.Drawing.Point(12, 11);
+            this.groupBox.Location = new System.Drawing.Point(14, 14);
+            this.groupBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.groupBox.Name = "groupBox";
-            this.groupBox.Size = new System.Drawing.Size(547, 300);
+            this.groupBox.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox.Size = new System.Drawing.Size(638, 375);
             this.groupBox.TabIndex = 7;
             this.groupBox.TabStop = false;
             this.groupBox.Text = "Unitypackage File";
@@ -311,10 +318,12 @@ namespace UpuGui
             // btnDeselectAll
             // 
             this.btnDeselectAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnDeselectAll.Image = ((System.Drawing.Image)(resources.GetObject("btnDeselectAll.Image")));
             this.btnDeselectAll.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnDeselectAll.Location = new System.Drawing.Point(481, 273);
+            this.btnDeselectAll.Location = new System.Drawing.Point(561, 341);
+            this.btnDeselectAll.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnDeselectAll.Name = "btnDeselectAll";
-            this.btnDeselectAll.Size = new System.Drawing.Size(60, 21);
+            this.btnDeselectAll.Size = new System.Drawing.Size(70, 26);
             this.btnDeselectAll.TabIndex = 7;
             this.btnDeselectAll.Text = "None";
             this.btnDeselectAll.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -324,10 +333,12 @@ namespace UpuGui
             // btnSelectAll
             // 
             this.btnSelectAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnSelectAll.Image = ((System.Drawing.Image)(resources.GetObject("btnSelectAll.Image")));
             this.btnSelectAll.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnSelectAll.Location = new System.Drawing.Point(415, 273);
+            this.btnSelectAll.Location = new System.Drawing.Point(484, 341);
+            this.btnSelectAll.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnSelectAll.Name = "btnSelectAll";
-            this.btnSelectAll.Size = new System.Drawing.Size(60, 21);
+            this.btnSelectAll.Size = new System.Drawing.Size(70, 26);
             this.btnSelectAll.TabIndex = 6;
             this.btnSelectAll.Text = "All";
             this.btnSelectAll.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -341,18 +352,21 @@ namespace UpuGui
             | System.Windows.Forms.AnchorStyles.Right)));
             this.treeViewContents.CheckBoxes = true;
             this.treeViewContents.HotTracking = true;
-            this.treeViewContents.Location = new System.Drawing.Point(6, 18);
+            this.treeViewContents.Location = new System.Drawing.Point(7, 22);
+            this.treeViewContents.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.treeViewContents.Name = "treeViewContents";
-            this.treeViewContents.Size = new System.Drawing.Size(535, 250);
+            this.treeViewContents.Size = new System.Drawing.Size(624, 312);
             this.treeViewContents.TabIndex = 5;
             // 
             // btnExit
             // 
             this.btnExit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnExit.Image = ((System.Drawing.Image)(resources.GetObject("btnExit.Image")));
             this.btnExit.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnExit.Location = new System.Drawing.Point(431, 343);
+            this.btnExit.Location = new System.Drawing.Point(503, 429);
+            this.btnExit.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnExit.Name = "btnExit";
-            this.btnExit.Size = new System.Drawing.Size(128, 30);
+            this.btnExit.Size = new System.Drawing.Size(149, 38);
             this.btnExit.TabIndex = 8;
             this.btnExit.Text = "Exit";
             this.btnExit.UseVisualStyleBackColor = true;
@@ -360,9 +374,10 @@ namespace UpuGui
             // 
             // statusStrip1
             // 
-            this.statusStrip1.Location = new System.Drawing.Point(0, 374);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 473);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(571, 22);
+            this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 16, 0);
+            this.statusStrip1.Size = new System.Drawing.Size(666, 22);
             this.statusStrip1.TabIndex = 9;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -370,19 +385,21 @@ namespace UpuGui
             // 
             this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar.Location = new System.Drawing.Point(12, 378);
+            this.progressBar.Location = new System.Drawing.Point(14, 472);
+            this.progressBar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.progressBar.MarqueeAnimationSpeed = 200;
             this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(541, 13);
+            this.progressBar.Size = new System.Drawing.Size(631, 16);
             this.progressBar.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
             this.progressBar.TabIndex = 10;
             // 
             // btnRegisterUnregister
             // 
             this.btnRegisterUnregister.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnRegisterUnregister.Location = new System.Drawing.Point(12, 317);
+            this.btnRegisterUnregister.Location = new System.Drawing.Point(14, 396);
+            this.btnRegisterUnregister.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnRegisterUnregister.Name = "btnRegisterUnregister";
-            this.btnRegisterUnregister.Size = new System.Drawing.Size(262, 21);
+            this.btnRegisterUnregister.Size = new System.Drawing.Size(306, 26);
             this.btnRegisterUnregister.TabIndex = 8;
             this.btnRegisterUnregister.Text = "Register Context Menu Handler";
             this.btnRegisterUnregister.UseVisualStyleBackColor = true;
@@ -390,10 +407,10 @@ namespace UpuGui
             // 
             // UpuGui
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(571, 396);
+            this.ClientSize = new System.Drawing.Size(666, 495);
             this.Controls.Add(this.btnRegisterUnregister);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.statusStrip1);
@@ -401,7 +418,9 @@ namespace UpuGui
             this.Controls.Add(this.groupBox);
             this.Controls.Add(this.btnSelectInputFile);
             this.Controls.Add(this.btnUnpack);
-            this.MinimumSize = new System.Drawing.Size(450, 243);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.MinimumSize = new System.Drawing.Size(522, 294);
             this.Name = "UpuGui";
             this.Text = "Unitypackage Unpacker for Unity®";
             this.groupBox.ResumeLayout(false);
