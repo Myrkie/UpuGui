@@ -1,10 +1,4 @@
-﻿// Decompiled with JetBrains decompiler
-// Type: UpuGui.UpuGui
-// Assembly: UpuGui, Version=1.0.2.0, Culture=neutral, PublicKeyToken=null
-// MVID: DD1D21B2-102B-4937-9736-F13C7AB91F14
-// Assembly location: C:\Users\veyvin\Desktop\UpuGui.exe
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -18,8 +12,6 @@ namespace UpuGui
 {
     public class UpuGui : Form
     {
-        private const string m_registerContextMenuButtonString = "Register Explorer Context Menu Handler";
-        private const string m_unregisterContextMenuButtonString = "Unregister Explorer Context Menu Handler";
         private Button btnDeselectAll;
         private Button btnExit;
         private Button btnRegisterUnregister;
