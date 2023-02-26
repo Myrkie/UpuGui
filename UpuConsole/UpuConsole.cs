@@ -19,10 +19,6 @@ namespace UpuConsole
 {
     public class UpuConsole
     {
-        private const string m_contextMenuFileType = "Unity package file";
-        private const string m_contextMenuShellKey = "Unpack";
-        private const string m_contextMenuRegPath = "Unity package file\\shell\\Unpack";
-        private const string m_contextMenuCommandRegPath = "Unity package file\\shell\\Unpack\\command";
         private string m_additionalCommandLineArgs;
         private readonly KISSUnpacker m_unpacker = new KISSUnpacker();
 
