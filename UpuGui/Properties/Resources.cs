@@ -31,13 +31,5 @@ namespace UpuGui.Properties
                 return resourceMan;
             }
         }
-
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
-        internal static CultureInfo Culture { get; set; }
-
-        internal static Bitmap _1405899564_archive_basic_green
-        {
-            get { return (Bitmap) ResourceManager.GetObject("1405899564_archive_basic_green", Culture); }
-        }
     }
 }
