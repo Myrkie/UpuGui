@@ -19,6 +19,7 @@ namespace UpuGui
         private Button _btnSelectAll;
         private Button _btnSelectInputFile;
         private Button _btnUnpack;
+        private Button _btnAbout;
 #pragma warning disable CS0649
         private IContainer components;
 #pragma warning restore CS0649
@@ -37,6 +38,7 @@ namespace UpuGui
         {
             InitializeComponent();
             _btnUnpack!.Enabled = false;
+            _btnAbout!.Enabled = true;
             _btnSelectAll!.Enabled = false;
             _btnDeselectAll!.Enabled = false;
             _progressBar!.Visible = false;
@@ -94,7 +96,6 @@ namespace UpuGui
         {
             // ReSharper disable once StringLiteralTypo
             _openFileDialog.Filter = @"Unitypackage Files|*.unitypackage";
-            var num = (int) _openFileDialog.ShowDialog();
             if (string.IsNullOrEmpty(_openFileDialog.FileName))
                 return;
             OpenFile(_openFileDialog.FileName);
@@ -256,6 +257,7 @@ namespace UpuGui
         {
             ComponentResourceManager resources = new ComponentResourceManager(typeof(UpuGui));
             _saveToFolderDialog = new FolderBrowserDialog();
+            _btnAbout = new Button();
             _btnUnpack = new Button();
             _btnSelectInputFile = new Button();
             _groupBox = new GroupBox();
@@ -270,10 +272,10 @@ namespace UpuGui
             _groupBox.SuspendLayout();
             SuspendLayout();
             // 
-            // btnUnpack
+            // _btnUnpack
             // 
             _btnUnpack.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            _btnUnpack.Image = (Image)resources.GetObject("btnUnpack.Image")!;
+            _btnUnpack.Image = (Image)resources.GetObject("_btnUnpack.Image");
             _btnUnpack.ImageAlign = ContentAlignment.MiddleLeft;
             _btnUnpack.Location = new Point(170, 429);
             _btnUnpack.Margin = new Padding(4, 4, 4, 4);
@@ -286,10 +288,10 @@ namespace UpuGui
             _btnUnpack.Click += btnUnpack_Click_1;
 #pragma warning restore CS8622
             // 
-            // btnSelectInputFile
+            // _btnSelectInputFile
             // 
             _btnSelectInputFile.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            _btnSelectInputFile.Image = (Image)resources.GetObject("btnSelectInputFile.Image")!;
+            _btnSelectInputFile.Image = (Image)resources.GetObject("_btnSelectInputFile.Image");
             _btnSelectInputFile.ImageAlign = ContentAlignment.MiddleLeft;
             _btnSelectInputFile.Location = new Point(14, 429);
             _btnSelectInputFile.Margin = new Padding(4, 4, 4, 4);
@@ -302,7 +304,7 @@ namespace UpuGui
             _btnSelectInputFile.Click += btnSelectInputFile_Click_1;
 #pragma warning restore CS8622
             // 
-            // groupBox
+            // _groupBox
             // 
             _groupBox.Anchor = ((AnchorStyles.Top | AnchorStyles.Bottom) 
                                | AnchorStyles.Left) 
@@ -320,10 +322,10 @@ namespace UpuGui
             // ReSharper disable once StringLiteralTypo
             _groupBox.Text = @"Unitypackage File";
             // 
-            // btnDeselectAll
+            // _btnDeselectAll
             // 
             _btnDeselectAll.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            _btnDeselectAll.Image = (Image)resources.GetObject("btnDeselectAll.Image")!;
+            _btnDeselectAll.Image = (Image)resources.GetObject("_btnDeselectAll.Image");
             _btnDeselectAll.ImageAlign = ContentAlignment.MiddleLeft;
             _btnDeselectAll.Location = new Point(561, 341);
             _btnDeselectAll.Margin = new Padding(4, 4, 4, 4);
@@ -337,10 +339,10 @@ namespace UpuGui
             _btnDeselectAll.Click += btnDeselectAll_Click_1;
 #pragma warning restore CS8622
             // 
-            // btnSelectAll
+            // _btnSelectAll
             // 
             _btnSelectAll.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            _btnSelectAll.Image = (Image)resources.GetObject("btnSelectAll.Image")!;
+            _btnSelectAll.Image = (Image)resources.GetObject("_btnSelectAll.Image");
             _btnSelectAll.ImageAlign = ContentAlignment.MiddleLeft;
             _btnSelectAll.Location = new Point(484, 341);
             _btnSelectAll.Margin = new Padding(4, 4, 4, 4);
@@ -354,10 +356,10 @@ namespace UpuGui
             _btnSelectAll.Click += btnSelectAll_Click_1;
 #pragma warning restore CS8622
             // 
-            // treeViewContents
+            // _treeViewContents
             // 
-            _treeViewContents.Anchor = ((AnchorStyles.Top | AnchorStyles.Bottom) 
-                                       | AnchorStyles.Left) 
+            _treeViewContents.Anchor = (AnchorStyles.Top | AnchorStyles.Bottom 
+                                                         | AnchorStyles.Left) 
                                       | AnchorStyles.Right;
             _treeViewContents.CheckBoxes = true;
             _treeViewContents.HotTracking = true;
@@ -367,10 +369,10 @@ namespace UpuGui
             _treeViewContents.Size = new Size(624, 312);
             _treeViewContents.TabIndex = 5;
             // 
-            // btnExit
+            // _btnExit
             // 
             _btnExit.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            _btnExit.Image = (Image)resources.GetObject("btnExit.Image")!;
+            _btnExit.Image = (Image)resources.GetObject("_btnExit.Image");
             _btnExit.ImageAlign = ContentAlignment.MiddleLeft;
             _btnExit.Location = new Point(503, 429);
             _btnExit.Margin = new Padding(4, 4, 4, 4);
@@ -383,7 +385,7 @@ namespace UpuGui
             _btnExit.Click += btnExit_Click_1;
 #pragma warning restore CS8622
             // 
-            // statusStrip1
+            // _statusStrip1
             // 
             _statusStrip1.Location = new Point(0, 473);
             _statusStrip1.Name = "_statusStrip1";
@@ -392,7 +394,7 @@ namespace UpuGui
             _statusStrip1.TabIndex = 9;
             _statusStrip1.Text = @"statusStrip1";
             // 
-            // progressBar
+            // _progressBar
             // 
             _progressBar.Anchor = (AnchorStyles.Bottom | AnchorStyles.Left) 
                                  | AnchorStyles.Right;
@@ -404,7 +406,7 @@ namespace UpuGui
             _progressBar.Style = ProgressBarStyle.Marquee;
             _progressBar.TabIndex = 10;
             // 
-            // btnRegisterUnregister
+            // _btnRegisterUnregister
             // 
             _btnRegisterUnregister.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             _btnRegisterUnregister.Location = new Point(14, 396);
@@ -416,6 +418,22 @@ namespace UpuGui
             _btnRegisterUnregister.UseVisualStyleBackColor = true;
 #pragma warning disable CS8622
             _btnRegisterUnregister.Click += btnRegisterUnregister_Click_1;
+#pragma warning restore CS8622
+            //
+            // _btnAbout
+            // 
+            _btnAbout.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            _btnAbout.Image = (Image)resources.GetObject("_btnAbout.Image");
+            _btnAbout.ImageAlign = ContentAlignment.MiddleLeft;
+            _btnAbout.Location = new Point(526, 394);
+            _btnAbout.Margin = new Padding(4);
+            _btnAbout.Name = "_btnAbout";
+            _btnAbout.Size = new Size(100, 31);
+            _btnAbout.TabIndex = 11;
+            _btnAbout.Text = "About";
+            _btnAbout.UseVisualStyleBackColor = true;
+#pragma warning disable CS8622
+            _btnAbout.Click += btnAbout_Click_1;
 #pragma warning restore CS8622
             // 
             // UpuGui
@@ -431,7 +449,8 @@ namespace UpuGui
             Controls.Add(_groupBox);
             Controls.Add(_btnSelectInputFile);
             Controls.Add(_btnUnpack);
-            Icon = (Icon)resources.GetObject("$this.Icon")!;
+            Controls.Add(_btnAbout);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(4, 4, 4, 4);
             MinimumSize = new Size(522, 294);
             Name = "UpuGui";
@@ -498,6 +517,10 @@ namespace UpuGui
         private void btnExit_Click_1(object sender, EventArgs e)
         {
             Application.Exit();
+        }
+        private void btnAbout_Click_1(object sender, EventArgs e)
+        {
+            Process.Start("cmd","/c start https://github.com/Myrkie/UpuGui");
         }
     }
 }
