@@ -19,7 +19,7 @@ Usage
 UpuGui.exe [options]
 
 **Options:**<br />
--i, --input: Unitypackage input file.<br />
+-i, --input: unitypackage input file.<br />
 -o, --output: The output path of the extracted unitypackage.<br />
 -r, --register: Register context menu handler.<br />
 -u, --unregister: Unregister context menu handler.<br />
