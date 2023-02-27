@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Security.Principal;
 using System.Text;
 using Microsoft.Win32;
@@ -14,7 +13,7 @@ namespace UpuConsole
     public class UpuConsole
     {
         private string m_additionalCommandLineArgs;
-        private readonly KISSUnpacker m_unpacker = new KISSUnpacker();
+        private readonly KISSUnpacker m_unpacker = new();
 
         public string InputFile { get; private set; }
 
@@ -27,32 +26,27 @@ namespace UpuConsole
         internal int Start()
         {
             var p = new OptionSet
-                {
-                    {
-                        "i=|input=",
-                        "Unitypackage input file.",
-                        i => InputFile = i
-                    }
-                }.Add("o:|output:", "The output path of the extracted unitypackage.", o => OutputPath = o)
-                .Add("r|register", "Register context menu handler", r => Register = r != null)
-                .Add("u|unregister", "Unregister context menu handler", u => Unregister = u != null);
+            {
+                { "i=|input=", "Unitypackage input file.", i => InputFile = i },
+                { "o=|output=", "The output path of the extracted unitypackage.", o => OutputPath = o },
+                { "r|register", "Register context menu handler", r => Register = r != null },
+                { "u|unregister", "Unregister context menu handler", u => Unregister = u != null },
+            };
+            
             p.Add("h|help", "Show help", h => Console.WriteLine(GetUsage(p)));
             p.Parse(Environment.GetCommandLineArgs());
             if (string.IsNullOrEmpty(InputFile) && !Register && !Unregister)
             {
                 Console.WriteLine(GetUsage(p));
-                return 1;
             }
             if (!string.IsNullOrEmpty(InputFile) && !File.Exists(InputFile))
             {
                 Console.WriteLine("File not found: " + InputFile);
                 Console.WriteLine(GetUsage(p));
-                return 2;
             }
             if (!string.IsNullOrEmpty(InputFile))
             {
                 DoUnpack(InputFile);
-                return 0;
             }
             return (Register || Unregister) && !RegisterUnregisterShellHandler(Register) ? 1 : 0;
         }
@@ -100,8 +94,8 @@ namespace UpuConsole
             try
             {
                 if (register)
-                    RegisterShellHandler("Unity package file", "Unpack", "Unpack here",
-                        string.Format("\"{0}\" \"--input=%L\"", System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName));
+                    RegisterShellHandler("Unity package file", "unpack", "Unpack here",
+                        string.Format("\"{0}\" \"--input=%L\"", Process.GetCurrentProcess().MainModule.FileName));
                 else
                     UnregisterShellHandler("Unity package file", "Unpack");
                 return true;
@@ -109,11 +103,9 @@ namespace UpuConsole
             catch (UnauthorizedAccessException ex)
             {
                 if (Register)
-                    Console.WriteLine(
-                        "Error: UnauthorizedAccessException. Cannot register explorer context menu handler!");
+                    Console.WriteLine("Error: UnauthorizedAccessException. Cannot register explorer context menu handler!");
                 if (Unregister)
-                    Console.WriteLine(
-                        "Error: UnauthorizedAccessException. Cannot register explorer context menu handler!");
+                    Console.WriteLine("Error: UnauthorizedAccessException. Cannot register explorer context menu handler!");
             }
             return false;
         }
@@ -128,17 +120,17 @@ namespace UpuConsole
                 stringBuilder.AppendLine(stringWriter.ToString());
             }
             stringBuilder.AppendLine("Help us make to this piece of software even better and contribute!");
-            stringBuilder.AppendLine("https://github.com/ChimeraEntertainment/UPU");
+            stringBuilder.AppendLine("https://github.com/Myrkie/UpuGui/");
             return stringBuilder.ToString();
         }
 
         private void RegisterShellHandler(string fileType, string shellKeyName, string menuText, string menuCommand)
         {
-            using (var subKey = Registry.ClassesRoot.CreateSubKey("Unity package file\\shell\\Unpack"))
+            using (var subKey = Registry.ClassesRoot.CreateSubKey($"{fileType}\\shell\\{shellKeyName}"))
             {
                 subKey.SetValue(null, menuText);
             }
-            using (var subKey = Registry.ClassesRoot.CreateSubKey("Unity package file\\shell\\Unpack\\command"))
+            using (var subKey = Registry.ClassesRoot.CreateSubKey($"{fileType}\\shell\\{shellKeyName}\\command"))
             {
                 subKey.SetValue(null, menuCommand);
             }
@@ -162,7 +154,7 @@ namespace UpuConsole
         {
             try
             {
-                m_unpacker.RemapFiles(m_unpacker.Unpack(InputFile, OutputPath));
+                m_unpacker.RemapFiles(m_unpacker.Unpack(fileName, OutputPath));
             }
             catch (Exception ex)
             {
