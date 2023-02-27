@@ -5,34 +5,31 @@ namespace UpuGui.tar_cs
 {
     public class TarWriter : LegacyTarWriter
     {
-        public TarWriter(Stream writeStream)
-            : base(writeStream)
+
+        public TarWriter(Stream writeStream) : base(writeStream)
         {
         }
 
-        protected override void WriteHeader(string? name, DateTime lastModificationTime, long count, int userId,
-            int groupId, int mode, EntryType entryType)
+        protected override void WriteHeader(string? name, DateTime lastModificationTime, long count, int userId, int groupId, int mode, EntryType entryType)
         {
-            var usTarHeader1 = new UsTarHeader
+            var tarHeader = new UsTarHeader()
             {
                 FileName = name,
                 LastModification = lastModificationTime,
                 SizeInBytes = count,
                 UserId = userId,
-                UserName = Convert.ToString(userId, 8),
+                UserName = Convert.ToString(userId,8),
                 GroupId = groupId,
-                GroupName = Convert.ToString(groupId, 8),
+                GroupName = Convert.ToString(groupId,8),
                 Mode = mode,
                 EntryType = entryType
             };
-            var usTarHeader2 = usTarHeader1;
-            OutStream.Write(usTarHeader2.GetHeaderValue(), 0, usTarHeader2.HeaderSize);
+            OutStream.Write(tarHeader.GetHeaderValue(), 0, tarHeader.HeaderSize);
         }
 
-        protected virtual void WriteHeader(string? name, DateTime lastModificationTime, long count, string userName,
-            string groupName, int mode)
+        protected virtual void WriteHeader(string name, DateTime lastModificationTime, long count, string userName, string groupName, int mode)
         {
-            var usTarHeader1 = new UsTarHeader
+            var tarHeader = new UsTarHeader()
             {
                 FileName = name,
                 LastModification = lastModificationTime,
@@ -43,26 +40,28 @@ namespace UpuGui.tar_cs
                 GroupName = groupName,
                 Mode = mode
             };
-            var usTarHeader2 = usTarHeader1;
-            OutStream.Write(usTarHeader2.GetHeaderValue(), 0, usTarHeader2.HeaderSize);
+            OutStream.Write(tarHeader.GetHeaderValue(), 0, tarHeader.HeaderSize);
         }
 
-        public virtual void Write(string? name, long dataSizeInBytes, string userName, string groupName, int mode,
-            DateTime lastModificationTime, WriteDataDelegate writeDelegate)
+
+        public virtual void Write(string name, long dataSizeInBytes, string userName, string groupName, int mode, DateTime lastModificationTime, WriteDataDelegate writeDelegate)
         {
-            var dataWriter = new DataWriter(OutStream, dataSizeInBytes);
+            var writer = new DataWriter(OutStream,dataSizeInBytes);
             WriteHeader(name, lastModificationTime, dataSizeInBytes, userName, groupName, mode);
-            while (dataWriter.CanWrite)
-                writeDelegate(dataWriter);
+            while(writer.CanWrite)
+            {
+                writeDelegate(writer);
+            }
             AlignTo512(dataSizeInBytes, false);
         }
 
-        public void Write(Stream data, long dataSizeInBytes, string? fileName, string userId, string groupId, int mode,
-            DateTime lastModificationTime)
+
+        public void Write(Stream data, long dataSizeInBytes, string fileName, string userId, string groupId, int mode,
+                          DateTime lastModificationTime)
         {
-            WriteHeader(fileName, lastModificationTime, dataSizeInBytes, userId, groupId, mode);
-            WriteContent(dataSizeInBytes, data);
-            AlignTo512(dataSizeInBytes, false);
+            WriteHeader(fileName,lastModificationTime,dataSizeInBytes,userId, groupId, mode);
+            WriteContent(dataSizeInBytes,data);
+            AlignTo512(dataSizeInBytes,false);
         }
     }
 }

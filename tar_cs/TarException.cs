@@ -4,8 +4,7 @@ namespace UpuGui.tar_cs
 {
     public class TarException : Exception
     {
-        public TarException(string message)
-            : base(message)
+        public TarException(string message) : base(message)
         {
         }
     }

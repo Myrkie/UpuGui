@@ -4,8 +4,9 @@ namespace UpuGui.tar_cs
 {
     internal class DataWriter : IArchiveDataWriter
     {
-        private readonly Stream _stream;
         private long _remainingBytes;
+        private bool _canWrite = true;
+        private readonly Stream _stream;
 
         public DataWriter(Stream data, long dataSizeInBytes)
         {
@@ -13,19 +14,27 @@ namespace UpuGui.tar_cs
             _stream = data;
         }
 
-        public bool CanWrite { get; private set; } = true;
-
         public int Write(byte[] buffer, int count)
         {
-            if (_remainingBytes == 0L)
+            if(_remainingBytes == 0)
             {
-                CanWrite = false;
+                _canWrite = false;
                 return -1;
             }
-            var count1 = _remainingBytes - count >= 0L ? count : (int) _remainingBytes;
-            _stream.Write(buffer, 0, count1);
-            _remainingBytes -= count1;
-            return count1;
+            int bytesToWrite;
+            if(_remainingBytes - count < 0)
+            {
+                bytesToWrite = (int)_remainingBytes;
+            }
+            else
+            {
+                bytesToWrite = count;
+            }
+            _stream.Write(buffer,0,bytesToWrite);
+            _remainingBytes -= bytesToWrite;
+            return bytesToWrite;
         }
+
+        public bool CanWrite => _canWrite;
     }
 }
