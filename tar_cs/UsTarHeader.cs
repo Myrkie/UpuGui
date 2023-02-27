@@ -6,43 +6,41 @@ namespace UpuGui.tar_cs
 {
     internal class UsTarHeader : TarHeader
     {
-        private const string magic = "ustar";
-        private const string version = "  ";
-        private string groupName;
-        private string namePrefix = string.Empty;
-        private string userName;
+        private string? _groupName;
+        private string _namePrefix = string.Empty;
+        private string? _userName;
 
-        public override string UserName
+        public override string? UserName
         {
-            get { return userName.Replace("\0", string.Empty); }
+            get => _userName!.Replace("\0", string.Empty);
             set
             {
-                if (value.Length > 32)
+                if (value!.Length > 32)
                     throw new TarException("user name can not be longer than 32 chars");
-                userName = value;
+                _userName = value;
             }
         }
 
-        public override string GroupName
+        public override string? GroupName
         {
-            get { return groupName.Replace("\0", string.Empty); }
+            get => _groupName!.Replace("\0", string.Empty);
             set
             {
-                if (value.Length > 32)
+                if (value!.Length > 32)
                     throw new TarException("group name can not be longer than 32 chars");
-                groupName = value;
+                _groupName = value;
             }
         }
 
-        public override string FileName
+        public override string? FileName
         {
-            get { return namePrefix.Replace("\0", string.Empty) + base.FileName.Replace("\0", string.Empty); }
+            get => _namePrefix.Replace("\0", string.Empty) + base.FileName!.Replace("\0", string.Empty);
             set
             {
-                if (value.Length > 100)
+                if (value!.Length > 100)
                 {
                     if (value.Length > byte.MaxValue)
-                        throw new TarException("UsTar fileName can not be longer thatn 255 chars");
+                        throw new TarException("UsTar fileName can not be longer than 255 chars");
                     var index = value.Length - 100;
                     while (!IsPathSeparator(value[index]))
                     {
@@ -52,7 +50,7 @@ namespace UpuGui.tar_cs
                     }
                     if (index == value.Length)
                         index = value.Length - 100;
-                    namePrefix = value.Substring(0, index);
+                    _namePrefix = value.Substring(0, index);
                     base.FileName = value.Substring(index, value.Length - index);
                 }
                 else
@@ -65,7 +63,7 @@ namespace UpuGui.tar_cs
             var bytes = GetBytes();
             UserName = Encoding.ASCII.GetString(bytes, 265, 32);
             GroupName = Encoding.ASCII.GetString(bytes, 297, 32);
-            namePrefix = Encoding.ASCII.GetString(bytes, 347, 157);
+            _namePrefix = Encoding.ASCII.GetString(bytes, 347, 157);
             return base.UpdateHeaderFromBytes();
         }
 
@@ -79,11 +77,12 @@ namespace UpuGui.tar_cs
         public override byte[] GetHeaderValue()
         {
             var headerValue = base.GetHeaderValue();
+            // ReSharper disable once StringLiteralTypo
             Encoding.ASCII.GetBytes("ustar").CopyTo(headerValue, 257);
             Encoding.ASCII.GetBytes("  ").CopyTo(headerValue, 262);
-            Encoding.ASCII.GetBytes(UserName).CopyTo(headerValue, 265);
-            Encoding.ASCII.GetBytes(GroupName).CopyTo(headerValue, 297);
-            Encoding.ASCII.GetBytes(namePrefix).CopyTo(headerValue, 347);
+            Encoding.ASCII.GetBytes(UserName!).CopyTo(headerValue, 265);
+            Encoding.ASCII.GetBytes(GroupName!).CopyTo(headerValue, 297);
+            Encoding.ASCII.GetBytes(_namePrefix).CopyTo(headerValue, 347);
             if (SizeInBytes >= 8589934591L)
                 SetMarker(AlignTo12(BitConverter.GetBytes(IPAddress.HostToNetworkOrder(SizeInBytes))))
                     .CopyTo(headerValue, 124);

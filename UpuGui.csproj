@@ -22,5 +22,11 @@
       <Content Include="Icons\Icon.ico" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Update="UpuGui\UpuGui.cs">
+        <SubType>Form</SubType>
+      </Compile>
+    </ItemGroup>
+
     
 </Project>

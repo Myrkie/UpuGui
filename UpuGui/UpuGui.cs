@@ -6,42 +6,46 @@ using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
-using UpuCore;
+using UpuGui.UpuCore;
 
+// ReSharper disable once CheckNamespace
 namespace UpuGui
 {
-    public class UpuGui : Form
+    public sealed class UpuGui : Form
     {
-        private Button btnDeselectAll;
-        private Button btnExit;
-        private Button btnRegisterUnregister;
-        private Button btnSelectAll;
-        private Button btnSelectInputFile;
-        private Button btnUnpack;
+        private Button _btnDeselectAll;
+        private Button _btnExit;
+        private Button _btnRegisterUnregister;
+        private Button _btnSelectAll;
+        private Button _btnSelectInputFile;
+        private Button _btnUnpack;
+#pragma warning disable CS0649
         private IContainer components;
-        private GroupBox groupBox;
-        private readonly KISSUnpacker m_ku;
-        private Dictionary<string, string> m_remapInfo;
-        private readonly Timer m_shellHandlerCheckTimer;
-        private string m_tmpUnpackedOutputPathForUi;
-        private readonly UpuConsole.UpuConsole m_upu;
-        private OpenFileDialog openFileDialog;
-        private ProgressBar progressBar;
-        private FolderBrowserDialog saveToFolderDialog;
-        private StatusStrip statusStrip1;
-        private TreeView treeViewContents;
+#pragma warning restore CS0649
+        private GroupBox _groupBox;
+        private readonly KissUnpacker _mKu;
+        private Dictionary<string, string> _mRemapInfo;
+        private string? _mTmpUnpackedOutputPathForUi;
+        private readonly UpuConsole.UpuConsole _mUpu;
+        private OpenFileDialog _openFileDialog;
+        private ProgressBar _progressBar;
+        private FolderBrowserDialog _saveToFolderDialog;
+        private StatusStrip _statusStrip1;
+        private TreeView _treeViewContents;
 
-        public UpuGui()
+        private UpuGui()
         {
             InitializeComponent();
-            btnUnpack.Enabled = false;
-            btnSelectAll.Enabled = false;
-            btnDeselectAll.Enabled = false;
-            progressBar.Visible = false;
-            treeViewContents.CheckBoxes = true;
+            _btnUnpack!.Enabled = false;
+            _btnSelectAll!.Enabled = false;
+            _btnDeselectAll!.Enabled = false;
+            _progressBar!.Visible = false;
+            _treeViewContents!.CheckBoxes = true;
             AllowDrop = true;
+#pragma warning disable CS8622
             DragEnter += Form1_DragEnter;
             DragDrop += Form1_DragDrop;
+#pragma warning restore CS8622
             var upuGui = this;
             var str = upuGui.Text + $" {Assembly.GetExecutingAssembly().GetName().Version}";
             upuGui.Text = str;
@@ -50,28 +54,30 @@ namespace UpuGui
         public UpuGui(UpuConsole.UpuConsole upu)
             : this()
         {
-            m_upu = upu;
+            _mUpu = upu;
             if (upu.IsContextMenuHandlerRegistered())
-                btnRegisterUnregister.Text = "Unregister Explorer Context Menu Handler";
-            m_ku = new KISSUnpacker();
-            m_shellHandlerCheckTimer = new Timer();
-            m_shellHandlerCheckTimer.Interval = 5000;
-            m_shellHandlerCheckTimer.Tick += ShellHandlerCheckTimer_Tick;
-            m_shellHandlerCheckTimer.Enabled = true;
-            m_shellHandlerCheckTimer.Start();
-            ShellHandlerCheckTimer_Tick(null, EventArgs.Empty);
+                _btnRegisterUnregister.Text = @"Unregister Explorer Context Menu Handler";
+            _mKu = new KissUnpacker();
+            var mShellHandlerCheckTimer = new Timer();
+            mShellHandlerCheckTimer.Interval = 5000;
+#pragma warning disable CS8622
+            mShellHandlerCheckTimer.Tick += ShellHandlerCheckTimer_Tick;
+#pragma warning restore CS8622
+            mShellHandlerCheckTimer.Enabled = true;
+            mShellHandlerCheckTimer.Start();
+            ShellHandlerCheckTimer_Tick(null!, EventArgs.Empty);
         }
 
         private void Form1_DragEnter(object sender, DragEventArgs e)
         {
-            if (!e.Data.GetDataPresent(DataFormats.FileDrop))
+            if (!e.Data!.GetDataPresent(DataFormats.FileDrop))
                 return;
             e.Effect = DragDropEffects.Copy;
         }
 
         private void Form1_DragDrop(object sender, DragEventArgs e)
         {
-            var strArray = (string[]) e.Data.GetData(DataFormats.FileDrop);
+            var strArray = (string[]) e.Data!.GetData(DataFormats.FileDrop)!;
             if (strArray.Length <= 0)
                 return;
             OpenFile(strArray[0]);
@@ -79,32 +85,33 @@ namespace UpuGui
 
         private void ShellHandlerCheckTimer_Tick(object sender, EventArgs e)
         {
-            if (m_upu.IsContextMenuHandlerRegistered())
-                btnRegisterUnregister.Text = "Unregister Explorer Context Menu Handler";
-            else
-                btnRegisterUnregister.Text = "Register Explorer Context Menu Handler";
-            btnRegisterUnregister.Enabled = true;
+            _btnRegisterUnregister.Text = _mUpu.IsContextMenuHandlerRegistered() ? @"Unregister Explorer Context Menu Handler" : @"Register Explorer Context Menu Handler";
+            _btnRegisterUnregister.Enabled = true;
         }
 
+        // ReSharper disable twice UnusedParameter.Local
         private void btnSelectInputFile_Click(object sender, EventArgs e)
         {
-            openFileDialog.Filter = "Unitypackage Files|*.unitypackage";
-            var num = (int) openFileDialog.ShowDialog();
-            if (string.IsNullOrEmpty(openFileDialog.FileName))
+            // ReSharper disable once StringLiteralTypo
+            _openFileDialog.Filter = @"Unitypackage Files|*.unitypackage";
+            var num = (int) _openFileDialog.ShowDialog();
+            if (string.IsNullOrEmpty(_openFileDialog.FileName))
                 return;
-            OpenFile(openFileDialog.FileName);
+            OpenFile(_openFileDialog.FileName);
         }
 
         private void OpenFile(string filePathName)
         {
-            groupBox.Text = new FileInfo(filePathName).Name;
-            btnExit.Enabled = false;
-            btnSelectInputFile.Enabled = false;
-            progressBar.Visible = true;
-            treeViewContents.Nodes.Clear();
+            _groupBox.Text = new FileInfo(filePathName).Name;
+            _btnExit.Enabled = false;
+            _btnSelectInputFile.Enabled = false;
+            _progressBar.Visible = true;
+            _treeViewContents.Nodes.Clear();
             var backgroundWorker = new BackgroundWorker();
+#pragma warning disable CS8622
             backgroundWorker.DoWork += ReadInputFileWorker;
             backgroundWorker.RunWorkerCompleted += ReadInputFileWorkerCompleted;
+#pragma warning restore CS8622
             backgroundWorker.RunWorkerAsync(filePathName);
         }
 
@@ -114,20 +121,21 @@ namespace UpuGui
             {
                 var num =
                     (int)
-                    MessageBox.Show("An exception happened: \n" + e.Result, "Ooops...", MessageBoxButtons.OK,
+                    // ReSharper disable once StringLiteralTypo
+                    MessageBox.Show(@"An exception happened: \n" + e.Result, @"Ooops...", MessageBoxButtons.OK,
                         MessageBoxIcon.Hand);
             }
             else
             {
-                foreach (var node in (List<TreeNode>) e.Result)
-                    treeViewContents.Nodes.Add(node);
+                foreach (var node in (List<TreeNode>) e.Result!)
+                    _treeViewContents.Nodes.Add(node);
             }
-            progressBar.Visible = false;
-            btnSelectInputFile.Enabled = true;
-            btnUnpack.Enabled = true;
-            btnSelectAll.Enabled = true;
-            btnDeselectAll.Enabled = true;
-            btnExit.Enabled = true;
+            _progressBar.Visible = false;
+            _btnSelectInputFile.Enabled = true;
+            _btnUnpack.Enabled = true;
+            _btnSelectAll.Enabled = true;
+            _btnDeselectAll.Enabled = true;
+            _btnExit.Enabled = true;
         }
 
         private void ReadInputFileWorker(object sender, DoWorkEventArgs e)
@@ -135,12 +143,12 @@ namespace UpuGui
             var list = new List<TreeNode>();
             try
             {
-                m_tmpUnpackedOutputPathForUi = m_ku.GetTempPath();
-                m_remapInfo = m_ku.Unpack(e.Argument.ToString(), m_tmpUnpackedOutputPathForUi);
-                foreach (var keyValuePair in m_remapInfo)
+                _mTmpUnpackedOutputPathForUi = _mKu.GetTempPath();
+                _mRemapInfo = _mKu.Unpack(e.Argument!.ToString(), _mTmpUnpackedOutputPathForUi);
+                foreach (var keyValuePair in _mRemapInfo)
                     if (File.Exists(keyValuePair.Key))
                     {
-                        var text = keyValuePair.Value.Replace(m_tmpUnpackedOutputPathForUi, "");
+                        var text = keyValuePair.Value.Replace(_mTmpUnpackedOutputPathForUi, "");
                         if (text.StartsWith(Path.DirectorySeparatorChar.ToString()))
                             text = text.Substring(1);
                         list.Add(new TreeNode(text)
@@ -149,7 +157,7 @@ namespace UpuGui
                             Tag = keyValuePair
                         });
                     }
-                list.Sort((t1, t2) => t1.Text.CompareTo(t2.Text));
+                list.Sort((t1, t2) => string.Compare(t1.Text, t2.Text, StringComparison.Ordinal));
             }
             catch (Exception ex)
             {
@@ -163,26 +171,26 @@ namespace UpuGui
 
         private void UnpackInputFileWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            btnSelectInputFile.Enabled = true;
-            btnUnpack.Enabled = true;
-            btnExit.Enabled = true;
-            progressBar.Visible = false;
+            _btnSelectInputFile.Enabled = true;
+            _btnUnpack.Enabled = true;
+            _btnExit.Enabled = true;
+            _progressBar.Visible = false;
         }
 
         private void UnpackInputFileWorker(object sender, DoWorkEventArgs e)
         {
-            if (!Directory.Exists(saveToFolderDialog.SelectedPath))
-                Directory.CreateDirectory(saveToFolderDialog.SelectedPath);
+            if (!Directory.Exists(_saveToFolderDialog.SelectedPath))
+                Directory.CreateDirectory(_saveToFolderDialog.SelectedPath);
             var map = new Dictionary<string, string>();
             var dictionary = new Dictionary<string, string>();
-            foreach (TreeNode treeNode in treeViewContents.Nodes)
+            foreach (TreeNode treeNode in _treeViewContents.Nodes)
                 if (treeNode.Checked)
                     dictionary.Add(((KeyValuePair<string, string>) treeNode.Tag).Key,
                         ((KeyValuePair<string, string>) treeNode.Tag).Value);
             foreach (var keyValuePair in dictionary)
-                map[keyValuePair.Key] = keyValuePair.Value.Replace(m_tmpUnpackedOutputPathForUi,
-                    saveToFolderDialog.SelectedPath);
-            m_ku.RemapFiles(map);
+                map[keyValuePair.Key] = keyValuePair.Value.Replace(_mTmpUnpackedOutputPathForUi!,
+                    _saveToFolderDialog.SelectedPath);
+            _mKu.RemapFiles(map);
         }
 
         private void saveToFolderDialog_HelpRequest(object sender, EventArgs e)
@@ -191,9 +199,9 @@ namespace UpuGui
 
         private void Cleanup()
         {
-            if ((m_tmpUnpackedOutputPathForUi == null) || !Directory.Exists(m_tmpUnpackedOutputPathForUi))
+            if ((_mTmpUnpackedOutputPathForUi == null) || !Directory.Exists(_mTmpUnpackedOutputPathForUi))
                 return;
-            Directory.Delete(m_tmpUnpackedOutputPathForUi, true);
+            Directory.Delete(_mTmpUnpackedOutputPathForUi, true);
         }
 
      
@@ -228,196 +236,210 @@ namespace UpuGui
 
         private void treeViewContents_MouseUp(object sender, MouseEventArgs e)
         {
-            var treeViewHitTestInfo = treeViewContents.HitTest(e.Location);
+            var treeViewHitTestInfo = _treeViewContents.HitTest(e.Location);
             if ((treeViewHitTestInfo.Node == null) || (treeViewHitTestInfo.Location != TreeViewHitTestLocations.Label))
                 return;
-            if (treeViewContents.SelectedNode == treeViewHitTestInfo.Node)
-                treeViewContents.SelectedNode.Checked = !treeViewContents.SelectedNode.Checked;
+            if (_treeViewContents.SelectedNode == treeViewHitTestInfo.Node)
+                _treeViewContents.SelectedNode.Checked = !_treeViewContents.SelectedNode.Checked;
             else
                 treeViewHitTestInfo.Node.Checked = !treeViewHitTestInfo.Node.Checked;
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing && components != null!)
                 components.Dispose();
             base.Dispose(disposing);
         }
 
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UpuGui));
-            this.saveToFolderDialog = new System.Windows.Forms.FolderBrowserDialog();
-            this.btnUnpack = new System.Windows.Forms.Button();
-            this.btnSelectInputFile = new System.Windows.Forms.Button();
-            this.groupBox = new System.Windows.Forms.GroupBox();
-            this.btnDeselectAll = new System.Windows.Forms.Button();
-            this.btnSelectAll = new System.Windows.Forms.Button();
-            this.treeViewContents = new System.Windows.Forms.TreeView();
-            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.btnExit = new System.Windows.Forms.Button();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.progressBar = new System.Windows.Forms.ProgressBar();
-            this.btnRegisterUnregister = new System.Windows.Forms.Button();
-            this.groupBox.SuspendLayout();
-            this.SuspendLayout();
+            ComponentResourceManager resources = new ComponentResourceManager(typeof(UpuGui));
+            _saveToFolderDialog = new FolderBrowserDialog();
+            _btnUnpack = new Button();
+            _btnSelectInputFile = new Button();
+            _groupBox = new GroupBox();
+            _btnDeselectAll = new Button();
+            _btnSelectAll = new Button();
+            _treeViewContents = new TreeView();
+            _openFileDialog = new OpenFileDialog();
+            _btnExit = new Button();
+            _statusStrip1 = new StatusStrip();
+            _progressBar = new ProgressBar();
+            _btnRegisterUnregister = new Button();
+            _groupBox.SuspendLayout();
+            SuspendLayout();
             // 
             // btnUnpack
             // 
-            this.btnUnpack.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnUnpack.Image = ((System.Drawing.Image)(resources.GetObject("btnUnpack.Image")));
-            this.btnUnpack.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnUnpack.Location = new System.Drawing.Point(170, 429);
-            this.btnUnpack.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.btnUnpack.Name = "btnUnpack";
-            this.btnUnpack.Size = new System.Drawing.Size(149, 38);
-            this.btnUnpack.TabIndex = 3;
-            this.btnUnpack.Text = "Unpack now";
-            this.btnUnpack.UseVisualStyleBackColor = true;
-            this.btnUnpack.Click += new System.EventHandler(this.btnUnpack_Click_1);
+            _btnUnpack.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            _btnUnpack.Image = (Image)resources.GetObject("btnUnpack.Image")!;
+            _btnUnpack.ImageAlign = ContentAlignment.MiddleLeft;
+            _btnUnpack.Location = new Point(170, 429);
+            _btnUnpack.Margin = new Padding(4, 4, 4, 4);
+            _btnUnpack.Name = "_btnUnpack";
+            _btnUnpack.Size = new Size(149, 38);
+            _btnUnpack.TabIndex = 3;
+            _btnUnpack.Text = @"Unpack now";
+            _btnUnpack.UseVisualStyleBackColor = true;
+#pragma warning disable CS8622
+            _btnUnpack.Click += btnUnpack_Click_1;
+#pragma warning restore CS8622
             // 
             // btnSelectInputFile
             // 
-            this.btnSelectInputFile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnSelectInputFile.Image = ((System.Drawing.Image)(resources.GetObject("btnSelectInputFile.Image")));
-            this.btnSelectInputFile.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnSelectInputFile.Location = new System.Drawing.Point(14, 429);
-            this.btnSelectInputFile.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.btnSelectInputFile.Name = "btnSelectInputFile";
-            this.btnSelectInputFile.Size = new System.Drawing.Size(149, 38);
-            this.btnSelectInputFile.TabIndex = 6;
-            this.btnSelectInputFile.Text = "Select Input File";
-            this.btnSelectInputFile.UseVisualStyleBackColor = true;
-            this.btnSelectInputFile.Click += new System.EventHandler(this.btnSelectInputFile_Click_1);
+            _btnSelectInputFile.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            _btnSelectInputFile.Image = (Image)resources.GetObject("btnSelectInputFile.Image")!;
+            _btnSelectInputFile.ImageAlign = ContentAlignment.MiddleLeft;
+            _btnSelectInputFile.Location = new Point(14, 429);
+            _btnSelectInputFile.Margin = new Padding(4, 4, 4, 4);
+            _btnSelectInputFile.Name = "_btnSelectInputFile";
+            _btnSelectInputFile.Size = new Size(149, 38);
+            _btnSelectInputFile.TabIndex = 6;
+            _btnSelectInputFile.Text = @"Select Input File";
+            _btnSelectInputFile.UseVisualStyleBackColor = true;
+#pragma warning disable CS8622
+            _btnSelectInputFile.Click += btnSelectInputFile_Click_1;
+#pragma warning restore CS8622
             // 
             // groupBox
             // 
-            this.groupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox.Controls.Add(this.btnDeselectAll);
-            this.groupBox.Controls.Add(this.btnSelectAll);
-            this.groupBox.Controls.Add(this.treeViewContents);
-            this.groupBox.Location = new System.Drawing.Point(14, 14);
-            this.groupBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.groupBox.Name = "groupBox";
-            this.groupBox.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.groupBox.Size = new System.Drawing.Size(638, 375);
-            this.groupBox.TabIndex = 7;
-            this.groupBox.TabStop = false;
-            this.groupBox.Text = "Unitypackage File";
+            _groupBox.Anchor = ((AnchorStyles.Top | AnchorStyles.Bottom) 
+                               | AnchorStyles.Left) 
+                              | AnchorStyles.Right;
+            _groupBox.Controls.Add(_btnDeselectAll);
+            _groupBox.Controls.Add(_btnSelectAll);
+            _groupBox.Controls.Add(_treeViewContents);
+            _groupBox.Location = new Point(14, 14);
+            _groupBox.Margin = new Padding(4, 4, 4, 4);
+            _groupBox.Name = "_groupBox";
+            _groupBox.Padding = new Padding(4, 4, 4, 4);
+            _groupBox.Size = new Size(638, 375);
+            _groupBox.TabIndex = 7;
+            _groupBox.TabStop = false;
+            // ReSharper disable once StringLiteralTypo
+            _groupBox.Text = @"Unitypackage File";
             // 
             // btnDeselectAll
             // 
-            this.btnDeselectAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnDeselectAll.Image = ((System.Drawing.Image)(resources.GetObject("btnDeselectAll.Image")));
-            this.btnDeselectAll.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnDeselectAll.Location = new System.Drawing.Point(561, 341);
-            this.btnDeselectAll.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.btnDeselectAll.Name = "btnDeselectAll";
-            this.btnDeselectAll.Size = new System.Drawing.Size(70, 26);
-            this.btnDeselectAll.TabIndex = 7;
-            this.btnDeselectAll.Text = "None";
-            this.btnDeselectAll.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.btnDeselectAll.UseVisualStyleBackColor = true;
-            this.btnDeselectAll.Click += new System.EventHandler(this.btnDeselectAll_Click_1);
+            _btnDeselectAll.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            _btnDeselectAll.Image = (Image)resources.GetObject("btnDeselectAll.Image")!;
+            _btnDeselectAll.ImageAlign = ContentAlignment.MiddleLeft;
+            _btnDeselectAll.Location = new Point(561, 341);
+            _btnDeselectAll.Margin = new Padding(4, 4, 4, 4);
+            _btnDeselectAll.Name = "_btnDeselectAll";
+            _btnDeselectAll.Size = new Size(70, 26);
+            _btnDeselectAll.TabIndex = 7;
+            _btnDeselectAll.Text = @"None";
+            _btnDeselectAll.TextAlign = ContentAlignment.MiddleRight;
+            _btnDeselectAll.UseVisualStyleBackColor = true;
+#pragma warning disable CS8622
+            _btnDeselectAll.Click += btnDeselectAll_Click_1;
+#pragma warning restore CS8622
             // 
             // btnSelectAll
             // 
-            this.btnSelectAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSelectAll.Image = ((System.Drawing.Image)(resources.GetObject("btnSelectAll.Image")));
-            this.btnSelectAll.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnSelectAll.Location = new System.Drawing.Point(484, 341);
-            this.btnSelectAll.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.btnSelectAll.Name = "btnSelectAll";
-            this.btnSelectAll.Size = new System.Drawing.Size(70, 26);
-            this.btnSelectAll.TabIndex = 6;
-            this.btnSelectAll.Text = "All";
-            this.btnSelectAll.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.btnSelectAll.UseVisualStyleBackColor = true;
-            this.btnSelectAll.Click += new System.EventHandler(this.btnSelectAll_Click_1);
+            _btnSelectAll.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            _btnSelectAll.Image = (Image)resources.GetObject("btnSelectAll.Image")!;
+            _btnSelectAll.ImageAlign = ContentAlignment.MiddleLeft;
+            _btnSelectAll.Location = new Point(484, 341);
+            _btnSelectAll.Margin = new Padding(4, 4, 4, 4);
+            _btnSelectAll.Name = "_btnSelectAll";
+            _btnSelectAll.Size = new Size(70, 26);
+            _btnSelectAll.TabIndex = 6;
+            _btnSelectAll.Text = @"All";
+            _btnSelectAll.TextAlign = ContentAlignment.MiddleRight;
+            _btnSelectAll.UseVisualStyleBackColor = true;
+#pragma warning disable CS8622
+            _btnSelectAll.Click += btnSelectAll_Click_1;
+#pragma warning restore CS8622
             // 
             // treeViewContents
             // 
-            this.treeViewContents.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.treeViewContents.CheckBoxes = true;
-            this.treeViewContents.HotTracking = true;
-            this.treeViewContents.Location = new System.Drawing.Point(7, 22);
-            this.treeViewContents.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.treeViewContents.Name = "treeViewContents";
-            this.treeViewContents.Size = new System.Drawing.Size(624, 312);
-            this.treeViewContents.TabIndex = 5;
+            _treeViewContents.Anchor = ((AnchorStyles.Top | AnchorStyles.Bottom) 
+                                       | AnchorStyles.Left) 
+                                      | AnchorStyles.Right;
+            _treeViewContents.CheckBoxes = true;
+            _treeViewContents.HotTracking = true;
+            _treeViewContents.Location = new Point(7, 22);
+            _treeViewContents.Margin = new Padding(4, 4, 4, 4);
+            _treeViewContents.Name = "_treeViewContents";
+            _treeViewContents.Size = new Size(624, 312);
+            _treeViewContents.TabIndex = 5;
             // 
             // btnExit
             // 
-            this.btnExit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnExit.Image = ((System.Drawing.Image)(resources.GetObject("btnExit.Image")));
-            this.btnExit.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnExit.Location = new System.Drawing.Point(503, 429);
-            this.btnExit.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.btnExit.Name = "btnExit";
-            this.btnExit.Size = new System.Drawing.Size(149, 38);
-            this.btnExit.TabIndex = 8;
-            this.btnExit.Text = "Exit";
-            this.btnExit.UseVisualStyleBackColor = true;
-            this.btnExit.Click += new System.EventHandler(this.btnExit_Click_1);
+            _btnExit.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            _btnExit.Image = (Image)resources.GetObject("btnExit.Image")!;
+            _btnExit.ImageAlign = ContentAlignment.MiddleLeft;
+            _btnExit.Location = new Point(503, 429);
+            _btnExit.Margin = new Padding(4, 4, 4, 4);
+            _btnExit.Name = "_btnExit";
+            _btnExit.Size = new Size(149, 38);
+            _btnExit.TabIndex = 8;
+            _btnExit.Text = @"Exit";
+            _btnExit.UseVisualStyleBackColor = true;
+#pragma warning disable CS8622
+            _btnExit.Click += btnExit_Click_1;
+#pragma warning restore CS8622
             // 
             // statusStrip1
             // 
-            this.statusStrip1.Location = new System.Drawing.Point(0, 473);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 16, 0);
-            this.statusStrip1.Size = new System.Drawing.Size(666, 22);
-            this.statusStrip1.TabIndex = 9;
-            this.statusStrip1.Text = "statusStrip1";
+            _statusStrip1.Location = new Point(0, 473);
+            _statusStrip1.Name = "_statusStrip1";
+            _statusStrip1.Padding = new Padding(1, 0, 16, 0);
+            _statusStrip1.Size = new Size(666, 22);
+            _statusStrip1.TabIndex = 9;
+            _statusStrip1.Text = @"statusStrip1";
             // 
             // progressBar
             // 
-            this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar.Location = new System.Drawing.Point(14, 472);
-            this.progressBar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.progressBar.MarqueeAnimationSpeed = 200;
-            this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(631, 16);
-            this.progressBar.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
-            this.progressBar.TabIndex = 10;
+            _progressBar.Anchor = (AnchorStyles.Bottom | AnchorStyles.Left) 
+                                 | AnchorStyles.Right;
+            _progressBar.Location = new Point(14, 472);
+            _progressBar.Margin = new Padding(4, 4, 4, 4);
+            _progressBar.MarqueeAnimationSpeed = 200;
+            _progressBar.Name = "_progressBar";
+            _progressBar.Size = new Size(631, 16);
+            _progressBar.Style = ProgressBarStyle.Marquee;
+            _progressBar.TabIndex = 10;
             // 
             // btnRegisterUnregister
             // 
-            this.btnRegisterUnregister.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnRegisterUnregister.Location = new System.Drawing.Point(14, 396);
-            this.btnRegisterUnregister.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.btnRegisterUnregister.Name = "btnRegisterUnregister";
-            this.btnRegisterUnregister.Size = new System.Drawing.Size(306, 26);
-            this.btnRegisterUnregister.TabIndex = 8;
-            this.btnRegisterUnregister.Text = "Register Context Menu Handler";
-            this.btnRegisterUnregister.UseVisualStyleBackColor = true;
-            this.btnRegisterUnregister.Click += new System.EventHandler(this.btnRegisterUnregister_Click_1);
+            _btnRegisterUnregister.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            _btnRegisterUnregister.Location = new Point(14, 396);
+            _btnRegisterUnregister.Margin = new Padding(4, 4, 4, 4);
+            _btnRegisterUnregister.Name = "_btnRegisterUnregister";
+            _btnRegisterUnregister.Size = new Size(306, 26);
+            _btnRegisterUnregister.TabIndex = 8;
+            _btnRegisterUnregister.Text = @"Register Context Menu Handler";
+            _btnRegisterUnregister.UseVisualStyleBackColor = true;
+#pragma warning disable CS8622
+            _btnRegisterUnregister.Click += btnRegisterUnregister_Click_1;
+#pragma warning restore CS8622
             // 
             // UpuGui
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(666, 495);
-            this.Controls.Add(this.btnRegisterUnregister);
-            this.Controls.Add(this.progressBar);
-            this.Controls.Add(this.statusStrip1);
-            this.Controls.Add(this.btnExit);
-            this.Controls.Add(this.groupBox);
-            this.Controls.Add(this.btnSelectInputFile);
-            this.Controls.Add(this.btnUnpack);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.MinimumSize = new System.Drawing.Size(522, 294);
-            this.Name = "UpuGui";
-            this.Text = "Unitypackage Unpacker for Unity®";
-            this.groupBox.ResumeLayout(false);
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            ClientSize = new Size(666, 495);
+            Controls.Add(_btnRegisterUnregister);
+            Controls.Add(_progressBar);
+            Controls.Add(_statusStrip1);
+            Controls.Add(_btnExit);
+            Controls.Add(_groupBox);
+            Controls.Add(_btnSelectInputFile);
+            Controls.Add(_btnUnpack);
+            Icon = (Icon)resources.GetObject("$this.Icon")!;
+            Margin = new Padding(4, 4, 4, 4);
+            MinimumSize = new Size(522, 294);
+            Name = "UpuGui";
+            // ReSharper disable once StringLiteralTypo
+            Text = @"Unitypackage Unpacker for Unity®";
+            _groupBox.ResumeLayout(false);
+            ResumeLayout(false);
+            PerformLayout();
 
         }
 
@@ -427,45 +449,49 @@ namespace UpuGui
 
         private void btnSelectInputFile_Click_1(object sender, EventArgs e)
         {
-            openFileDialog.Filter = "Unitypackage Files|*.unitypackage";
-            var num = (int)openFileDialog.ShowDialog();
-            if (string.IsNullOrEmpty(openFileDialog.FileName))
+            // ReSharper disable once StringLiteralTypo
+            _openFileDialog.Filter = @"Unitypackage Files|*.unitypackage";
+            var num = (int)_openFileDialog.ShowDialog();
+            if (string.IsNullOrEmpty(_openFileDialog.FileName))
                 return;
-            OpenFile(openFileDialog.FileName);
+            OpenFile(_openFileDialog.FileName);
         }
 
         private void btnUnpack_Click_1(object sender, EventArgs e)
         {
-            if (m_remapInfo == null)
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            if (_mRemapInfo == null)
                 return;
-            var num = (int)saveToFolderDialog.ShowDialog();
-            if (string.IsNullOrEmpty(saveToFolderDialog.SelectedPath))
+            var num = (int)_saveToFolderDialog.ShowDialog();
+            if (string.IsNullOrEmpty(_saveToFolderDialog.SelectedPath))
                 return;
-            btnSelectInputFile.Enabled = false;
-            btnUnpack.Enabled = false;
-            btnExit.Enabled = false;
-            progressBar.Visible = true;
+            _btnSelectInputFile.Enabled = false;
+            _btnUnpack.Enabled = false;
+            _btnExit.Enabled = false;
+            _progressBar.Visible = true;
             var backgroundWorker = new BackgroundWorker();
+#pragma warning disable CS8622
             backgroundWorker.DoWork += UnpackInputFileWorker;
             backgroundWorker.RunWorkerCompleted += UnpackInputFileWorkerCompleted;
+#pragma warning restore CS8622
             backgroundWorker.RunWorkerAsync();
         }
 
         private void btnRegisterUnregister_Click_1(object sender, EventArgs e)
         {
-            m_upu.RegisterUnregisterShellHandler(!m_upu.IsContextMenuHandlerRegistered());
-            btnRegisterUnregister.Enabled = false;
+            _mUpu.RegisterUnregisterShellHandler(!_mUpu.IsContextMenuHandlerRegistered());
+            _btnRegisterUnregister.Enabled = false;
         }
 
         private void btnSelectAll_Click_1(object sender, EventArgs e)
         {
-            foreach (TreeNode treeNode in treeViewContents.Nodes)
+            foreach (TreeNode treeNode in _treeViewContents.Nodes)
                 treeNode.Checked = true;
         }
 
         private void btnDeselectAll_Click_1(object sender, EventArgs e)
         {
-            foreach (TreeNode treeNode in treeViewContents.Nodes)
+            foreach (TreeNode treeNode in _treeViewContents.Nodes)
                 treeNode.Checked = false;
         }
 

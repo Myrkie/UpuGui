@@ -5,21 +5,18 @@ namespace UpuGui.tar_cs
 {
     public class TarReader
     {
-        private readonly byte[] dataBuffer = new byte[512];
-        private readonly UsTarHeader header;
-        private readonly Stream inStream;
-        private long remainingBytesInFile;
+        private readonly byte[]? _dataBuffer = new byte[512];
+        private readonly UsTarHeader _header;
+        private readonly Stream _inStream;
+        private long _remainingBytesInFile;
 
         public TarReader(Stream tarredData)
         {
-            inStream = tarredData;
-            header = new UsTarHeader();
+            _inStream = tarredData;
+            _header = new UsTarHeader();
         }
 
-        public ITarHeader FileInfo
-        {
-            get { return header; }
-        }
+        private ITarHeader FileInfo => _header;
 
         public void ReadToEnd(string destDirectory)
         {
@@ -27,8 +24,8 @@ namespace UpuGui.tar_cs
             {
                 var fileName1 = FileInfo.FileName;
                 var path = destDirectory + Path.DirectorySeparatorChar + fileName1;
-                if (UsTarHeader.IsPathSeparator(fileName1[fileName1.Length - 1]) ||
-                    (FileInfo.EntryType == EntryType.Directory))
+                if (fileName1 != null && (UsTarHeader.IsPathSeparator(fileName1[^1]) ||
+                                          (FileInfo.EntryType == EntryType.Directory)))
                 {
                     Directory.CreateDirectory(path);
                 }
@@ -36,48 +33,46 @@ namespace UpuGui.tar_cs
                 {
                     var fileName2 = Path.GetFileName(path);
                     Directory.CreateDirectory(path.Remove(path.Length - fileName2.Length));
-                    using (var fileStream = File.Create(path))
-                    {
-                        Read(fileStream);
-                    }
+                    using var fileStream = File.Create(path);
+                    Read(fileStream);
                 }
             }
         }
 
-        public void Read(Stream dataDestanation)
+        // ReSharper disable once IdentifierTypo
+        private void Read(Stream dataDestanation)
         {
-            byte[] buffer;
             int count;
-            while ((count = Read(out buffer)) != -1)
-                dataDestanation.Write(buffer, 0, count);
+            while ((count = Read(out var buffer)) != -1)
+                dataDestanation.Write(buffer!, 0, count);
         }
 
-        protected int Read(out byte[] buffer)
+        private int Read(out byte[]? buffer)
         {
-            if (remainingBytesInFile == 0L)
+            if (_remainingBytesInFile == 0L)
             {
                 buffer = null;
                 return -1;
             }
             var num1 = -1;
             long num2;
-            if (remainingBytesInFile - 512L > 0L)
+            if (_remainingBytesInFile - 512L > 0L)
             {
                 num2 = 512L;
             }
             else
             {
-                num1 = 512 - (int) remainingBytesInFile;
-                num2 = remainingBytesInFile;
+                num1 = 512 - (int) _remainingBytesInFile;
+                num2 = _remainingBytesInFile;
             }
-            var num3 = inStream.Read(dataBuffer, 0, (int) num2);
-            remainingBytesInFile -= num3;
-            if (inStream.CanSeek && (num1 > 0))
-                inStream.Seek(num1, SeekOrigin.Current);
+            var num3 = _inStream.Read(_dataBuffer!, 0, (int) num2);
+            _remainingBytesInFile -= num3;
+            if (_inStream.CanSeek && (num1 > 0))
+                _inStream.Seek(num1, SeekOrigin.Current);
             else
                 for (; num1 > 0; --num1)
-                    inStream.ReadByte();
-            buffer = dataBuffer;
+                    _inStream.ReadByte();
+            buffer = _dataBuffer;
             return num3;
         }
 
@@ -89,37 +84,31 @@ namespace UpuGui.tar_cs
             return true;
         }
 
-        public bool MoveNext(bool skipData)
+        private bool MoveNext(bool skipData)
         {
-            if (remainingBytesInFile > 0L)
+            if (_remainingBytesInFile > 0L)
             {
                 if (!skipData)
                     throw new TarException(
                         "You are trying to change file while not all the data from the previous one was read. If you do want to skip files use skipData parameter set to true.");
-                if (inStream.CanSeek)
+                if (_inStream.CanSeek)
                 {
-                    var num = remainingBytesInFile%512L;
-                    inStream.Seek(remainingBytesInFile + (512L - (num == 0L ? 512L : num)), SeekOrigin.Current);
-                }
-                else
-                {
-                    byte[] buffer;
-                    while (Read(out buffer) != -1)
-                    ;
+                    var num = _remainingBytesInFile%512L;
+                    _inStream.Seek(_remainingBytesInFile + (512L - (num == 0L ? 512L : num)), SeekOrigin.Current);
                 }
             }
-            var bytes = header.GetBytes();
-            if (inStream.Read(bytes, 0, header.HeaderSize) < 512)
+            var bytes = _header.GetBytes();
+            if (_inStream.Read(bytes, 0, _header.HeaderSize) < 512)
                 throw new TarException("Can not read header");
             if (IsEmpty(bytes))
             {
-                if ((inStream.Read(bytes, 0, header.HeaderSize) == 512) && IsEmpty(bytes))
+                if ((_inStream.Read(bytes, 0, _header.HeaderSize) == 512) && IsEmpty(bytes))
                     return false;
                 throw new TarException("Broken archive");
             }
-            if (header.UpdateHeaderFromBytes())
+            if (_header.UpdateHeaderFromBytes())
                 throw new TarException("Checksum check failed");
-            remainingBytesInFile = header.SizeInBytes;
+            _remainingBytesInFile = _header.SizeInBytes;
             return true;
         }
     }

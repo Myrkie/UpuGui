@@ -6,11 +6,11 @@ namespace UpuGui.tar_cs
 {
     public class LegacyTarWriter : IDisposable
     {
-        protected byte[] buffer = new byte[1024];
-        private bool isClosed;
-        public bool ReadOnZero = true;
+        private readonly byte[] _buffer = new byte[1024];
+        private bool _isClosed;
+        private const bool ReadOnZero = true;
 
-        public LegacyTarWriter(Stream writeStream)
+        protected LegacyTarWriter(Stream writeStream)
         {
             OutStream = writeStream;
         }
@@ -22,20 +22,20 @@ namespace UpuGui.tar_cs
             Close();
         }
 
-        public void WriteDirectoryEntry(string path)
+        private void WriteDirectoryEntry(string? path)
         {
             if (string.IsNullOrEmpty(path))
-                throw new ArgumentNullException("path");
-            if (path[path.Length - 1] != 47)
+                throw new ArgumentNullException(nameof(path));
+            if (path[^1] != 47)
                 path += (string) (object) '/';
             var lastModificationTime = !Directory.Exists(path) ? DateTime.Now : Directory.GetLastWriteTime(path);
             WriteHeader(path, lastModificationTime, 0L, 101, 101, 777, EntryType.Directory);
         }
 
-        public void WriteDirectory(string directory, bool doRecursive)
+        public void WriteDirectory(string? directory, bool doRecursive)
         {
             if (string.IsNullOrEmpty(directory))
-                throw new ArgumentNullException("directory");
+                throw new ArgumentNullException(nameof(directory));
             WriteDirectoryEntry(directory);
             foreach (var fileName in Directory.GetFiles(directory))
                 Write(fileName);
@@ -47,31 +47,29 @@ namespace UpuGui.tar_cs
             }
         }
 
-        public void Write(string fileName)
+        private void Write(string? fileName)
         {
             if (string.IsNullOrEmpty(fileName))
-                throw new ArgumentNullException("fileName");
-            using (var fileStream = File.OpenRead(fileName))
-            {
-                Write(fileStream, fileStream.Length, fileName, 61, 61, 511, File.GetLastWriteTime(fileStream.Name));
-            }
+                throw new ArgumentNullException(nameof(fileName));
+            using var fileStream = File.OpenRead(fileName);
+            Write(fileStream, fileStream.Length, fileName, 61, 61, 511, File.GetLastWriteTime(fileStream.Name));
         }
 
         public void Write(FileStream file)
         {
             var name =
                 Path.GetFullPath(file.Name)
-                    .Replace(Path.GetPathRoot(file.Name), string.Empty)
+                    .Replace(Path.GetPathRoot(file.Name)!, string.Empty)
                     .Replace(Path.DirectorySeparatorChar, '/');
             Write(file, file.Length, name, 61, 61, 511, File.GetLastWriteTime(file.Name));
         }
 
-        public void Write(Stream data, long dataSizeInBytes, string name)
+        public void Write(Stream data, long dataSizeInBytes, string? name)
         {
             Write(data, dataSizeInBytes, name, 61, 61, 511, DateTime.Now);
         }
 
-        public virtual void Write(string name, long dataSizeInBytes, int userId, int groupId, int mode,
+        public virtual void Write(string? name, long dataSizeInBytes, int userId, int groupId, int mode,
             DateTime lastModificationTime, WriteDataDelegate writeDelegate)
         {
             IArchiveDataWriter writer = new DataWriter(OutStream, dataSizeInBytes);
@@ -81,10 +79,9 @@ namespace UpuGui.tar_cs
             AlignTo512(dataSizeInBytes, false);
         }
 
-        public virtual void Write(Stream data, long dataSizeInBytes, string name, int userId, int groupId, int mode,
-            DateTime lastModificationTime)
+        protected virtual void Write(Stream data, long dataSizeInBytes, string? name, int userId, int groupId, int mode, DateTime lastModificationTime)
         {
-            if (isClosed)
+            if (_isClosed)
                 throw new TarException("Can not write to the closed writer");
             WriteHeader(name, lastModificationTime, dataSizeInBytes, userId, groupId, mode, EntryType.File);
             WriteContent(dataSizeInBytes, data);
@@ -93,32 +90,44 @@ namespace UpuGui.tar_cs
 
         protected void WriteContent(long count, Stream data)
         {
-            while ((count > 0L) && (count > buffer.Length))
+            while ((count > 0L) && (count > _buffer.Length))
             {
-                var count1 = data.Read(buffer, 0, buffer.Length);
-                if (count1 < 0)
-                    throw new IOException("LegacyTarWriter unable to read from provided stream");
-                if (count1 == 0)
-                    if (ReadOnZero)
-                        Thread.Sleep(100);
-                    else
+                var count1 = data.Read(_buffer, 0, _buffer.Length);
+                switch (count1)
+                {
+                    case < 0:
+                        throw new IOException("LegacyTarWriter unable to read from provided stream");
+                    case 0:
+                    {
+                        if (ReadOnZero)
+                            Thread.Sleep(100);
                         break;
-                OutStream.Write(buffer, 0, count1);
+                    }
+                }
+
+                OutStream.Write(_buffer, 0, count1);
                 count -= count1;
             }
             if (count <= 0L)
                 return;
-            var count2 = data.Read(buffer, 0, (int) count);
-            if (count2 < 0)
-                throw new IOException("LegacyTarWriter unable to read from provided stream");
-            if (count2 == 0)
-                for (; count > 0L; --count)
-                    OutStream.WriteByte(0);
-            else
-                OutStream.Write(buffer, 0, count2);
+            var count2 = data.Read(_buffer, 0, (int) count);
+            switch (count2)
+            {
+                case < 0:
+                    throw new IOException("LegacyTarWriter unable to read from provided stream");
+                case 0:
+                {
+                    for (; count > 0L; --count)
+                        OutStream.WriteByte(0);
+                    break;
+                }
+                default:
+                    OutStream.Write(_buffer, 0, count2);
+                    break;
+            }
         }
 
-        protected virtual void WriteHeader(string name, DateTime lastModificationTime, long count, int userId,
+        protected virtual void WriteHeader(string? name, DateTime lastModificationTime, long count, int userId,
             int groupId, int mode, EntryType entryType)
         {
             var tarHeader = new TarHeader
@@ -134,7 +143,7 @@ namespace UpuGui.tar_cs
             OutStream.Write(tarHeader.GetHeaderValue(), 0, tarHeader.HeaderSize);
         }
 
-        public void AlignTo512(long size, bool acceptZero)
+        protected void AlignTo512(long size, bool acceptZero)
         {
             size %= 512L;
             if ((size == 0L) && !acceptZero)
@@ -143,13 +152,13 @@ namespace UpuGui.tar_cs
                 OutStream.WriteByte(0);
         }
 
-        public virtual void Close()
+        protected virtual void Close()
         {
-            if (isClosed)
+            if (_isClosed)
                 return;
             AlignTo512(0L, true);
             AlignTo512(0L, true);
-            isClosed = true;
+            _isClosed = true;
         }
     }
 }

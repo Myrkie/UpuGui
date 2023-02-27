@@ -6,11 +6,11 @@ namespace UpuGui.tar_cs
 {
     internal class TarHeader : ITarHeader
     {
-        private static readonly byte[] spaces = Encoding.ASCII.GetBytes("        ");
-        private readonly byte[] buffer = new byte[512];
-        protected readonly DateTime TheEpoch = new DateTime(1970, 1, 1, 0, 0, 0);
-        private string fileName;
-        private long headerChecksum;
+        private static readonly byte[] Spaces = Encoding.ASCII.GetBytes("        ");
+        private readonly byte[] _buffer = new byte[512];
+        private readonly DateTime _theEpoch = new DateTime(1970, 1, 1, 0, 0, 0);
+        private string? _fileName;
+        private long _headerChecksum;
 
         public TarHeader()
         {
@@ -19,46 +19,28 @@ namespace UpuGui.tar_cs
             GroupId = 61;
         }
 
-        public string ModeString
-        {
-            get { return Convert.ToString(Mode, 8).PadLeft(7, '0'); }
-        }
+        private string ModeString => Convert.ToString(Mode, 8).PadLeft(7, '0');
 
-        public string UserIdString
-        {
-            get { return Convert.ToString(UserId, 8).PadLeft(7, '0'); }
-        }
+        private string UserIdString => Convert.ToString(UserId, 8).PadLeft(7, '0');
 
-        public string GroupIdString
-        {
-            get { return Convert.ToString(GroupId, 8).PadLeft(7, '0'); }
-        }
+        private string GroupIdString => Convert.ToString(GroupId, 8).PadLeft(7, '0');
 
-        public string SizeString
-        {
-            get { return Convert.ToString(SizeInBytes, 8).PadLeft(11, '0'); }
-        }
+        private string SizeString => Convert.ToString(SizeInBytes, 8).PadLeft(11, '0');
 
-        public string LastModificationString
-        {
-            get { return Convert.ToString((long) (LastModification - TheEpoch).TotalSeconds, 8).PadLeft(11, '0'); }
-        }
+        private string LastModificationString => Convert.ToString((long) (LastModification - _theEpoch).TotalSeconds, 8).PadLeft(11, '0');
 
-        public string HeaderChecksumString
-        {
-            get { return Convert.ToString(headerChecksum, 8).PadLeft(6, '0'); }
-        }
+        protected string HeaderChecksumString => Convert.ToString(_headerChecksum, 8).PadLeft(6, '0');
 
         public EntryType EntryType { get; set; }
 
-        public virtual string FileName
+        public virtual string? FileName
         {
-            get { return fileName.Replace("\0", string.Empty); }
+            get => _fileName?.Replace("\0", string.Empty);
             set
             {
-                if (value.Length > 100)
+                if (value is { Length: > 100 })
                     throw new TarException("A file name can not be more than 100 chars long");
-                fileName = value;
+                _fileName = value;
             }
         }
 
@@ -66,32 +48,29 @@ namespace UpuGui.tar_cs
 
         public int UserId { get; set; }
 
-        public virtual string UserName
+        public virtual string? UserName
         {
-            get { return UserId.ToString(); }
-            set { UserId = int.Parse(value); }
+            get => UserId.ToString();
+            set => UserId = int.Parse(value!);
         }
 
         public int GroupId { get; set; }
 
-        public virtual string GroupName
+        public virtual string? GroupName
         {
-            get { return GroupId.ToString(); }
-            set { GroupId = int.Parse(value); }
+            get => GroupId.ToString();
+            set => GroupId = int.Parse(value!);
         }
 
         public long SizeInBytes { get; set; }
 
         public DateTime LastModification { get; set; }
 
-        public virtual int HeaderSize
-        {
-            get { return 512; }
-        }
+        public virtual int HeaderSize => 512;
 
         public byte[] GetBytes()
         {
-            return buffer;
+            return _buffer;
         }
 
         private string TrimNulls(string input)
@@ -101,60 +80,60 @@ namespace UpuGui.tar_cs
 
         public virtual bool UpdateHeaderFromBytes()
         {
-            FileName = Encoding.ASCII.GetString(buffer, 0, 100);
-            Mode = Convert.ToInt32(TrimNulls(Encoding.ASCII.GetString(buffer, 100, 7)), 8);
-            UserId = Convert.ToInt32(TrimNulls(Encoding.ASCII.GetString(buffer, 108, 7)), 8);
-            GroupId = Convert.ToInt32(TrimNulls(Encoding.ASCII.GetString(buffer, 116, 7)), 8);
-            EntryType = (EntryType) buffer[156];
-            SizeInBytes = ((int) buffer[124] & 128) != 128
-                ? Convert.ToInt64(TrimNulls(Encoding.ASCII.GetString(buffer, 124, 11)), 8)
-                : IPAddress.NetworkToHostOrder(BitConverter.ToInt64(buffer, 128));
+            FileName = Encoding.ASCII.GetString(_buffer, 0, 100);
+            Mode = Convert.ToInt32(TrimNulls(Encoding.ASCII.GetString(_buffer, 100, 7)), 8);
+            UserId = Convert.ToInt32(TrimNulls(Encoding.ASCII.GetString(_buffer, 108, 7)), 8);
+            GroupId = Convert.ToInt32(TrimNulls(Encoding.ASCII.GetString(_buffer, 116, 7)), 8);
+            EntryType = (EntryType) _buffer[156];
+            SizeInBytes = (_buffer[124] & 128) != 128
+                ? Convert.ToInt64(TrimNulls(Encoding.ASCII.GetString(_buffer, 124, 11)), 8)
+                : IPAddress.NetworkToHostOrder(BitConverter.ToInt64(_buffer, 128));
             LastModification =
-                TheEpoch.AddSeconds(Convert.ToInt64(TrimNulls(Encoding.ASCII.GetString(buffer, 136, 11)), 8));
-            var num = Convert.ToInt32(TrimNulls(Encoding.ASCII.GetString(buffer, 148, 6)));
-            RecalculateChecksum(buffer);
-            if (num == headerChecksum)
+                _theEpoch.AddSeconds(Convert.ToInt64(TrimNulls(Encoding.ASCII.GetString(_buffer, 136, 11)), 8));
+            var num = Convert.ToInt32(TrimNulls(Encoding.ASCII.GetString(_buffer, 148, 6)));
+            RecalculateChecksum(_buffer);
+            if (num == _headerChecksum)
                 return true;
-            RecalculateAltChecksum(buffer);
-            return num == headerChecksum;
+            RecalculateAltChecksum(_buffer);
+            return num == _headerChecksum;
         }
 
         private void RecalculateAltChecksum(byte[] buf)
         {
-            spaces.CopyTo(buf, 148);
-            headerChecksum = 0L;
+            Spaces.CopyTo(buf, 148);
+            _headerChecksum = 0L;
             foreach (var num in buf)
                 if ((num & 128) == 128)
-                    headerChecksum -= num ^ 128;
+                    _headerChecksum -= num ^ 128;
                 else
-                    headerChecksum += num;
+                    _headerChecksum += num;
         }
 
         public virtual byte[] GetHeaderValue()
         {
-            Array.Clear(buffer, 0, buffer.Length);
+            Array.Clear(_buffer, 0, _buffer.Length);
             if (string.IsNullOrEmpty(FileName))
                 throw new TarException("FileName can not be empty.");
             if (FileName.Length >= 100)
                 throw new TarException("FileName is too long. It must be less than 100 bytes.");
-            Encoding.ASCII.GetBytes(FileName.PadRight(100, char.MinValue)).CopyTo(buffer, 0);
-            Encoding.ASCII.GetBytes(ModeString).CopyTo(buffer, 100);
-            Encoding.ASCII.GetBytes(UserIdString).CopyTo(buffer, 108);
-            Encoding.ASCII.GetBytes(GroupIdString).CopyTo(buffer, 116);
-            Encoding.ASCII.GetBytes(SizeString).CopyTo(buffer, 124);
-            Encoding.ASCII.GetBytes(LastModificationString).CopyTo(buffer, 136);
-            buffer[156] = (byte) EntryType;
-            RecalculateChecksum(buffer);
-            Encoding.ASCII.GetBytes(HeaderChecksumString).CopyTo(buffer, 148);
-            return buffer;
+            Encoding.ASCII.GetBytes(FileName.PadRight(100, char.MinValue)).CopyTo(_buffer, 0);
+            Encoding.ASCII.GetBytes(ModeString).CopyTo(_buffer, 100);
+            Encoding.ASCII.GetBytes(UserIdString).CopyTo(_buffer, 108);
+            Encoding.ASCII.GetBytes(GroupIdString).CopyTo(_buffer, 116);
+            Encoding.ASCII.GetBytes(SizeString).CopyTo(_buffer, 124);
+            Encoding.ASCII.GetBytes(LastModificationString).CopyTo(_buffer, 136);
+            _buffer[156] = (byte) EntryType;
+            RecalculateChecksum(_buffer);
+            Encoding.ASCII.GetBytes(HeaderChecksumString).CopyTo(_buffer, 148);
+            return _buffer;
         }
 
         protected virtual void RecalculateChecksum(byte[] buf)
         {
-            spaces.CopyTo(buf, 148);
-            headerChecksum = 0L;
+            Spaces.CopyTo(buf, 148);
+            _headerChecksum = 0L;
             foreach (long num in buf)
-                headerChecksum += num;
+                _headerChecksum += num;
         }
     }
 }

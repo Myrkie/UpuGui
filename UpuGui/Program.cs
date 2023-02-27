@@ -2,10 +2,12 @@
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
+// ReSharper disable once CheckNamespace
 namespace UpuGui
 {
     internal static class Program
     {
+        // ReSharper disable once InconsistentNaming
         private const int ATTACH_PARENT_PROCESS = -1;
 
         [DllImport("kernel32.dll")]

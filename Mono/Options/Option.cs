@@ -584,12 +584,12 @@ namespace UpuGui.Mono.Options
             }
         }
 
-        public OptionSet Add(string prototype, Action<string> action)
+        public OptionSet Add(string prototype, Action<string?> action)
         {
             return Add(prototype, null, action);
         }
 
-        public OptionSet Add(string prototype, string description, Action<string> action)
+        public OptionSet Add(string prototype, string description, Action<string?> action)
         {
             if (action == null) throw new ArgumentNullException("action");
             Option p = new ActionOption(prototype, description, 1, delegate(OptionValueCollection v) { action(v[0]); });

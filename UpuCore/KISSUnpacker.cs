@@ -4,16 +4,19 @@ using System.IO;
 using System.IO.Compression;
 using UpuGui.tar_cs;
 
-namespace UpuCore
+namespace UpuGui.UpuCore
 {
-    public class KISSUnpacker
+    // ReSharper disable once IdentifierTypo
+    public class KissUnpacker
     {
-        private string GetDefaultOutputPathName(string inputFilepath, string outputPath = null)
+        private string GetDefaultOutputPathName(string? inputFilepath, string? outputPath = null!)
         {
-            var fileInfo = new FileInfo(inputFilepath);
+            var fileInfo = new FileInfo(inputFilepath!);
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            // ReSharper disable once ConvertIfStatementToNullCoalescingAssignment
             if (outputPath == null)
             {
-                outputPath = fileInfo.Directory.FullName;
+                outputPath = fileInfo.Directory!.FullName;
             }
             var output = Path.Combine(outputPath, fileInfo.Name + "_unpacked");
 
@@ -30,16 +33,18 @@ namespace UpuCore
             return Path.Combine(Path.Combine(Path.GetTempPath(), "Upu"), Path.GetRandomFileName());
         }
 
-        public Dictionary<string, string> Unpack(string inputFilepath, string outputPath)
+        public Dictionary<string, string> Unpack(string? inputFilepath, string? outputPath)
         {
             Console.WriteLine($@"Extracting {inputFilepath} to {outputPath}");
             if (!File.Exists(inputFilepath))
             {
-                inputFilepath = Path.Combine(Environment.CurrentDirectory, inputFilepath);
+                inputFilepath = Path.Combine(Environment.CurrentDirectory, inputFilepath!);
                 if (!File.Exists(inputFilepath))
                     throw new FileNotFoundException(inputFilepath);
             }
+            // ReSharper disable once StringLiteralTypo
             if (!inputFilepath.ToLower().EndsWith(".unitypackage"))
+                // ReSharper disable once StringLiteralTypo
                 throw new ArgumentException("File should have unitypackage extension");
             outputPath = GetDefaultOutputPathName(inputFilepath, outputPath);
             if (!Directory.Exists(outputPath))
@@ -53,7 +58,7 @@ namespace UpuCore
             return GenerateRemapInfo(str2, outputPath);
         }
 
-        private Dictionary<string, string> GenerateRemapInfo(string extractedContentPath, string remapPath)
+        private Dictionary<string, string> GenerateRemapInfo(string extractedContentPath, string? remapPath)
         {
             var dictionary = new Dictionary<string, string>();
             foreach (var directoryInfo in new DirectoryInfo(extractedContentPath).GetDirectories())
@@ -61,8 +66,7 @@ namespace UpuCore
                 var path2 = File.ReadAllLines(Path.Combine(directoryInfo.FullName, "pathname"))[0].Replace('/',
                     Path.DirectorySeparatorChar);
                 var key = Path.Combine(directoryInfo.FullName, "asset");
-                var fileName = Path.Combine(remapPath, path2);
-                var fullName = new FileInfo(fileName).Directory.FullName;
+                var fileName = Path.Combine(remapPath!, path2);
                 dictionary.Add(key, fileName);
             }
             return dictionary;
@@ -78,7 +82,7 @@ namespace UpuCore
                 if (!Directory.Exists(fileInfo.DirectoryName))
                 {
                     Console.WriteLine($@"Creating directory {str}...");
-                    Directory.CreateDirectory(fileInfo.DirectoryName);
+                    Directory.CreateDirectory(fileInfo.DirectoryName!);
                 }
                 if (File.Exists(key))
                 {
@@ -92,24 +96,19 @@ namespace UpuCore
 
         private string DecompressGZip(FileInfo fileToDecompress, string outputPath)
         {
-            using (var fileStream1 = fileToDecompress.OpenRead())
-            {
-                var path2 = fileToDecompress.Name;
-                if (fileToDecompress.Extension.Length > 0)
-                    path2 = path2.Remove(path2.Length - fileToDecompress.Extension.Length);
-                if (!Directory.Exists(outputPath))
-                    Directory.CreateDirectory(outputPath);
-                var path = Path.Combine(outputPath, path2);
-                using (var fileStream2 = File.Create(path))
-                {
-                    using (var gzipStream = new GZipStream(fileStream1, CompressionMode.Decompress))
-                    {
-                        CopyStreamDotNet20(gzipStream, fileStream2);
-                        Console.WriteLine(@"Decompressed: {0}", fileToDecompress.Name);
-                    }
-                }
-                return path;
-            }
+            using var fileStream1 = fileToDecompress.OpenRead();
+            var path2 = fileToDecompress.Name;
+            if (fileToDecompress.Extension.Length > 0)
+                path2 = path2.Remove(path2.Length - fileToDecompress.Extension.Length);
+            if (!Directory.Exists(outputPath))
+                Directory.CreateDirectory(outputPath);
+            var path = Path.Combine(outputPath, path2);
+            using var fileStream2 = File.Create(path);
+            using var gzipStream = new GZipStream(fileStream1, CompressionMode.Decompress);
+            CopyStreamDotNet20(gzipStream, fileStream2);
+            Console.WriteLine(@"Decompressed: {0}", fileToDecompress.Name);
+
+            return path;
         }
 
         private void CopyStreamDotNet20(Stream input, Stream output)
@@ -120,6 +119,7 @@ namespace UpuCore
                 output.Write(buffer, 0, count);
         }
 
+        // ReSharper disable once UnusedMethodReturnValue.Local
         private bool ExtractTar(string tarFileName, string destFolder)
         {
             Console.WriteLine($@"Extracting {tarFileName} to {destFolder}...");
