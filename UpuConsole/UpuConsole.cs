@@ -132,6 +132,10 @@ namespace UpuConsole
             {
                 subKey.SetValue(null, menuText);
             }
+            using (var iconKey = Registry.ClassesRoot.CreateSubKey($"{fileType}\\shell\\{shellKeyName}"))
+            {
+                iconKey.SetValue("Icon", Process.GetCurrentProcess().MainModule.FileName);
+            }
             using (var subKey = Registry.ClassesRoot.CreateSubKey($"{fileType}\\shell\\{shellKeyName}\\command"))
             {
                 subKey.SetValue(null, menuCommand);
