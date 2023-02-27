@@ -45,6 +45,7 @@ namespace UpuGui
             _treeViewContents!.CheckBoxes = true;
             AllowDrop = true;
 #pragma warning disable CS8622
+            FormClosed += UpuGui_FormClosed;
             DragEnter += Form1_DragEnter;
             DragDrop += Form1_DragDrop;
 #pragma warning restore CS8622
@@ -89,16 +90,6 @@ namespace UpuGui
         {
             _btnRegisterUnregister.Text = _mUpu.IsContextMenuHandlerRegistered() ? @"Unregister Explorer Context Menu Handler" : @"Register Explorer Context Menu Handler";
             _btnRegisterUnregister.Enabled = true;
-        }
-
-        // ReSharper disable twice UnusedParameter.Local
-        private void btnSelectInputFile_Click(object sender, EventArgs e)
-        {
-            // ReSharper disable once StringLiteralTypo
-            _openFileDialog.Filter = @"Unitypackage Files|*.unitypackage";
-            if (string.IsNullOrEmpty(_openFileDialog.FileName))
-                return;
-            OpenFile(_openFileDialog.FileName);
         }
 
         private void OpenFile(string filePathName)
@@ -194,22 +185,12 @@ namespace UpuGui
             _mKu.RemapFiles(map);
         }
 
-        private void saveToFolderDialog_HelpRequest(object sender, EventArgs e)
-        {
-        }
-
         private void Cleanup()
         {
             if ((_mTmpUnpackedOutputPathForUi == null) || !Directory.Exists(_mTmpUnpackedOutputPathForUi))
                 return;
             Directory.Delete(_mTmpUnpackedOutputPathForUi, true);
         }
-
-     
-
-   
-     
-
         private void treeViewContents_AfterSelect(object sender, TreeViewEventArgs e)
         {
         }
@@ -217,33 +198,6 @@ namespace UpuGui
         private void UpuGui_FormClosed(object sender, FormClosedEventArgs e)
         {
             Cleanup();
-        }
-
-     
-
-     
-        private void picDonate_Click(object sender, EventArgs e)
-        {
-            Process.Start("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=SUWNSCDY6SDFN");
-        }
-
-        private void treeViewContents_Click(object sender, EventArgs e)
-        {
-        }
-
-        private void treeViewContents_AfterSelect_1(object sender, TreeViewEventArgs e)
-        {
-        }
-
-        private void treeViewContents_MouseUp(object sender, MouseEventArgs e)
-        {
-            var treeViewHitTestInfo = _treeViewContents.HitTest(e.Location);
-            if ((treeViewHitTestInfo.Node == null) || (treeViewHitTestInfo.Location != TreeViewHitTestLocations.Label))
-                return;
-            if (_treeViewContents.SelectedNode == treeViewHitTestInfo.Node)
-                _treeViewContents.SelectedNode.Checked = !_treeViewContents.SelectedNode.Checked;
-            else
-                treeViewHitTestInfo.Node.Checked = !treeViewHitTestInfo.Node.Checked;
         }
 
         protected override void Dispose(bool disposing)
@@ -460,10 +414,6 @@ namespace UpuGui
             ResumeLayout(false);
             PerformLayout();
 
-        }
-
-        private void groupBox_Enter(object sender, EventArgs e)
-        {
         }
 
         private void btnSelectInputFile_Click_1(object sender, EventArgs e)

@@ -161,7 +161,8 @@ namespace UpuGui.UpuConsole
         {
             try
             {
-                _mUnpacker.RemapFiles(_mUnpacker.Unpack(fileName, OutputPath));
+                _mUnpacker.RemapFiles(_mUnpacker.Unpack(fileName, OutputPath, null));
+                Directory.Delete(KissUnpacker.tempPath, true);
             }
             catch (Exception ex)
             {

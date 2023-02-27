@@ -9,6 +9,7 @@ namespace UpuGui.UpuCore
     // ReSharper disable once IdentifierTypo
     public class KissUnpacker
     {
+        internal static string tempPath;
         private string GetDefaultOutputPathName(string? inputFilepath, string? outputPath = null!)
         {
             var fileInfo = new FileInfo(inputFilepath!);
@@ -33,7 +34,7 @@ namespace UpuGui.UpuCore
             return Path.Combine(Path.Combine(Path.GetTempPath(), "Upu"), Path.GetRandomFileName());
         }
 
-        public Dictionary<string, string> Unpack(string? inputFilepath, string? outputPath)
+        public Dictionary<string, string> Unpack(string? inputFilepath, string? outputPath, string? tempdir)
         {
             Console.WriteLine($@"Extracting {inputFilepath} to {outputPath}");
             if (!File.Exists(inputFilepath))
@@ -49,7 +50,7 @@ namespace UpuGui.UpuCore
             outputPath = GetDefaultOutputPathName(inputFilepath, outputPath);
             if (!Directory.Exists(outputPath))
                 Directory.CreateDirectory(outputPath);
-            var tempPath = GetTempPath();
+            tempPath = tempdir ?? GetTempPath();
             var str1 = Path.Combine(tempPath, "_UPU_TAR");
             var tarFileName = DecompressGZip(new FileInfo(inputFilepath), str1);
             var str2 = Path.Combine(tempPath, "content");
