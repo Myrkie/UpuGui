@@ -15,13 +15,13 @@ namespace UpuConsole
         private string m_additionalCommandLineArgs;
         private readonly KISSUnpacker m_unpacker = new();
 
-        public string InputFile { get; private set; }
+        private string InputFile { get; set; }
 
-        public string OutputPath { get; private set; }
+        private string OutputPath { get; set; }
 
-        public bool Register { get; private set; }
+        private bool Register { get; set; }
 
-        public bool Unregister { get; private set; }
+        private bool Unregister { get; set; }
 
         internal int Start()
         {
