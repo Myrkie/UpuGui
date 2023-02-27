@@ -5,8 +5,8 @@ using System.IO;
 using System.Security.Principal;
 using System.Text;
 using Microsoft.Win32;
-using Mono.Options;
 using UpuCore;
+using UpuGui.Mono.Options;
 
 namespace UpuConsole
 {
