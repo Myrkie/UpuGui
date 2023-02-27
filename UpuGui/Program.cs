@@ -23,8 +23,7 @@ namespace UpuGui
             var upu = new UpuConsole.UpuConsole();
             if (args.Length > 0)
             {
-                if (!AttachConsole(-1))
-                    AllocConsole();
+                if (!AttachConsole(ATTACH_PARENT_PROCESS)) AllocConsole();
                 var exitCode = 0;
                 try
                 {
@@ -35,8 +34,7 @@ namespace UpuGui
                     Console.WriteLine(ex);
                 }
                 FreeConsole();
-                if (!string.Join(" ", Environment.GetCommandLineArgs()).Contains("--elevated"))
-                    SendKeys.SendWait("{ENTER}");
+                if (!string.Join(" ", Environment.GetCommandLineArgs()).Contains("--elevated")) SendKeys.SendWait("{ENTER}");
                 Environment.Exit(exitCode);
             }
             else
