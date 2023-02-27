@@ -11,29 +11,18 @@ namespace UpuCore
         private string GetDefaultOutputPathName(string inputFilepath, string outputPath = null)
         {
             var fileInfo = new FileInfo(inputFilepath);
-            var flag = false;
             if (outputPath == null)
             {
-                outputPath = Path.Combine(fileInfo.Directory.FullName, fileInfo.Name + "_unpacked");
-                flag = true;
+                outputPath = fileInfo.Directory.FullName;
             }
-            if (Directory.Exists(outputPath) && flag)
-            {
-                var num = 2;
-                string path;
-                while (true)
-                {
-                    path = Path.Combine(fileInfo.Directory.FullName,
-                        string.Concat(outputPath, (object) " (", (object) num, (object) ")"));
-                    if (Directory.Exists(path))
-                        ++num;
-                    else
-                        break;
-                }
-                Directory.CreateDirectory(path);
-                outputPath = path;
-            }
-            return outputPath;
+            var output = Path.Combine(outputPath, fileInfo.Name + "_unpacked");
+
+            if (!Directory.Exists(output)) return output;
+            Directory.Delete(output,true);
+            var path = Path.Combine(outputPath, fileInfo.Name + "_unpacked");
+            Directory.CreateDirectory(path);
+            output = path;
+            return output;
         }
 
         public string GetTempPath()
@@ -44,7 +33,6 @@ namespace UpuCore
         public Dictionary<string, string> Unpack(string inputFilepath, string outputPath)
         {
             Console.WriteLine("Extracting " + inputFilepath + " to " + outputPath);
-            var fileInfo = new FileInfo(inputFilepath);
             if (!File.Exists(inputFilepath))
             {
                 inputFilepath = Path.Combine(Environment.CurrentDirectory, inputFilepath);
@@ -63,15 +51,6 @@ namespace UpuCore
             ExtractTar(tarFileName, str2);
             Directory.Delete(str1, true);
             return GenerateRemapInfo(str2, outputPath);
-        }
-
-        private void RemoveTempFiles(string tempPath)
-        {
-            var directoryInfo1 = new DirectoryInfo(tempPath);
-            foreach (FileSystemInfo fileSystemInfo in directoryInfo1.GetFiles())
-                fileSystemInfo.Delete();
-            foreach (var directoryInfo2 in directoryInfo1.GetDirectories())
-                directoryInfo2.Delete(true);
         }
 
         private Dictionary<string, string> GenerateRemapInfo(string extractedContentPath, string remapPath)
