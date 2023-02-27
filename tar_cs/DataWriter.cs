@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace tar_cs
+namespace UpuGui.tar_cs
 {
     internal class DataWriter : IArchiveDataWriter
     {

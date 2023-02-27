@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 
-namespace tar_cs
+namespace UpuGui.tar_cs
 {
     public class TarReader
     {

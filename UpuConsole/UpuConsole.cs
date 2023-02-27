@@ -71,12 +71,14 @@ namespace UpuConsole
             var str = "";
             for (var index = 1; index < Environment.GetCommandLineArgs().Length; ++index)
                 str = str + Environment.GetCommandLineArgs()[index] + " ";
-            var startInfo = new ProcessStartInfo();
-            startInfo.UseShellExecute = true;
-            startInfo.WorkingDirectory = Environment.CurrentDirectory;
-            startInfo.FileName = Process.GetCurrentProcess().MainModule.FileName;
-            startInfo.Arguments = str + " " + m_additionalCommandLineArgs + " --elevated";
-            startInfo.Verb = "runas";
+            var startInfo = new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                WorkingDirectory = Environment.CurrentDirectory,
+                FileName = Process.GetCurrentProcess().MainModule.FileName,
+                Arguments = str + " " + m_additionalCommandLineArgs + " --elevated",
+                Verb = "runas"
+            };
             try
             {
                 Process.Start(startInfo);
@@ -95,7 +97,7 @@ namespace UpuConsole
             {
                 if (register)
                     RegisterShellHandler("Unity package file", "unpack", "Unpack here",
-                        string.Format("\"{0}\" \"--input=%L\"", Process.GetCurrentProcess().MainModule.FileName));
+                        $"\"{Process.GetCurrentProcess().MainModule.FileName}\" \"--input=%L\"");
                 else
                     UnregisterShellHandler("Unity package file", "Unpack");
                 return true;

@@ -2,7 +2,7 @@
 using System.Net;
 using System.Text;
 
-namespace tar_cs
+namespace UpuGui.tar_cs
 {
     internal class TarHeader : ITarHeader
     {

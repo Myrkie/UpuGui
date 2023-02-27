@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading;
 
-namespace tar_cs
+namespace UpuGui.tar_cs
 {
     public class LegacyTarWriter : IDisposable
     {

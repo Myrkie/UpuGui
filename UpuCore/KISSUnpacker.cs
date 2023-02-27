@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using tar_cs;
+using UpuGui.tar_cs;
 
 namespace UpuCore
 {

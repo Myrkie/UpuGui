@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace tar_cs
+namespace UpuGui.tar_cs
 {
     public class TarException : Exception
     {
