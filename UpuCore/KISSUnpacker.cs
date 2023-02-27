@@ -32,7 +32,7 @@ namespace UpuCore
 
         public Dictionary<string, string> Unpack(string inputFilepath, string outputPath)
         {
-            Console.WriteLine("Extracting " + inputFilepath + " to " + outputPath);
+            Console.WriteLine($@"Extracting {inputFilepath} to {outputPath}");
             if (!File.Exists(inputFilepath))
             {
                 inputFilepath = Path.Combine(Environment.CurrentDirectory, inputFilepath);
@@ -77,12 +77,12 @@ namespace UpuCore
                 var fileInfo = new FileInfo(keyValuePair.Value);
                 if (!Directory.Exists(fileInfo.DirectoryName))
                 {
-                    Console.WriteLine("Creating directory " + str + "...");
+                    Console.WriteLine($@"Creating directory {str}...");
                     Directory.CreateDirectory(fileInfo.DirectoryName);
                 }
                 if (File.Exists(key))
                 {
-                    Console.WriteLine("Extracting file " + str + "...");
+                    Console.WriteLine($@"Extracting file {str}...");
                     if (File.Exists(str))
                         File.Delete(str);
                     File.Move(key, str);
@@ -105,7 +105,7 @@ namespace UpuCore
                     using (var gzipStream = new GZipStream(fileStream1, CompressionMode.Decompress))
                     {
                         CopyStreamDotNet20(gzipStream, fileStream2);
-                        Console.WriteLine("Decompressed: {0}", fileToDecompress.Name);
+                        Console.WriteLine(@"Decompressed: {0}", fileToDecompress.Name);
                     }
                 }
                 return path;
@@ -120,9 +120,9 @@ namespace UpuCore
                 output.Write(buffer, 0, count);
         }
 
-        public bool ExtractTar(string tarFileName, string destFolder)
+        private bool ExtractTar(string tarFileName, string destFolder)
         {
-            Console.WriteLine("Extracting " + tarFileName + " to " + destFolder + "...");
+            Console.WriteLine($@"Extracting {tarFileName} to {destFolder}...");
             var currentDirectory = Directory.GetCurrentDirectory();
             using (Stream tarredData = File.OpenRead(tarFileName))
             {

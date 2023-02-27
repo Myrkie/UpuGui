@@ -103,14 +103,14 @@ namespace UpuConsole
             catch (UnauthorizedAccessException ex)
             {
                 if (Register)
-                    Console.WriteLine("Error: UnauthorizedAccessException. Cannot register explorer context menu handler!");
+                    Console.WriteLine(@"Error: UnauthorizedAccessException. Cannot register explorer context menu handler!");
                 if (Unregister)
-                    Console.WriteLine("Error: UnauthorizedAccessException. Cannot register explorer context menu handler!");
+                    Console.WriteLine(@"Error: UnauthorizedAccessException. Cannot register explorer context menu handler!");
             }
             return false;
         }
 
-        public string GetUsage(OptionSet p)
+        private string GetUsage(OptionSet p)
         {
             var stringBuilder = new StringBuilder();
             stringBuilder.AppendLine();
@@ -150,7 +150,7 @@ namespace UpuConsole
             return (registryKey != null) && (registryKey.GetValue(null) != null);
         }
 
-        internal void DoUnpack(string fileName)
+        private void DoUnpack(string fileName)
         {
             try
             {
@@ -158,12 +158,12 @@ namespace UpuConsole
             }
             catch (Exception ex)
             {
-                Console.WriteLine("==========================================");
+                Console.WriteLine(@"==========================================");
                 Console.WriteLine(ex);
-                Console.WriteLine("==========================================");
+                Console.WriteLine(@"==========================================");
                 if (!Environment.UserInteractive)
                     return;
-                Console.WriteLine("An error occured (see above)!");
+                Console.WriteLine(@"An error occured (see above)!");
             }
         }
     }
