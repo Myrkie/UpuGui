@@ -164,8 +164,9 @@ namespace UpuGui
 
         private void UnpackInputFileWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            _btnAbout.Enabled = true;
             _btnSelectInputFile.Enabled = true;
-            _btnUnpack.Enabled = true;
+            _btnUnpack.Enabled = false;
             _btnExit.Enabled = true;
             _progressBar.Visible = false;
         }
@@ -388,7 +389,7 @@ namespace UpuGui
             _btnAbout.Name = "_btnAbout";
             _btnAbout.Size = new Size(100, 31);
             _btnAbout.TabIndex = 11;
-            _btnAbout.Text = "About";
+            _btnAbout.Text = @"About";
             _btnAbout.UseVisualStyleBackColor = true;
 #pragma warning disable CS8622
             _btnAbout.Click += btnAbout_Click_1;
@@ -438,6 +439,7 @@ namespace UpuGui
             var num = (int)_saveToFolderDialog.ShowDialog();
             if (string.IsNullOrEmpty(_saveToFolderDialog.SelectedPath))
                 return;
+            _btnAbout.Enabled = false;
             _btnSelectInputFile.Enabled = false;
             _btnUnpack.Enabled = false;
             _btnExit.Enabled = false;
