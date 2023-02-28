@@ -77,228 +77,6 @@ namespace UpuGui
             ShellHandlerCheckTimer_Tick(null!, EventArgs.Empty);
         }
 
-        private void Form1_DragEnter(object sender, DragEventArgs e)
-        {
-            if (!e.Data!.GetDataPresent(DataFormats.FileDrop))
-                return;
-            e.Effect = DragDropEffects.Copy;
-        }
-
-        private void Form1_DragDrop(object sender, DragEventArgs e)
-        {
-            var strArray = (string[]) e.Data!.GetData(DataFormats.FileDrop)!;
-            if (strArray.Length <= 0)
-                return;
-            OpenFile(strArray[0]);
-        }
-
-        private void ShellHandlerCheckTimer_Tick(object sender, EventArgs e)
-        {
-            _btnRegisterUnregister.Text = _mUpu.IsContextMenuHandlerRegistered() ? @"Unregister Explorer Context Menu Handler" : @"Register Explorer Context Menu Handler";
-            _btnRegisterUnregister.Enabled = true;
-        }
-
-        private void OpenFile(string filePathName)
-        {
-            _groupBox.Text = new FileInfo(filePathName).Name;
-            _btnExit.Enabled = false;
-            _btnSelectInputFile.Enabled = false;
-            _progressBar.Visible = true;
-            _treeViewContents.Nodes.Clear();
-            var backgroundWorker = new BackgroundWorker();
-#pragma warning disable CS8622
-            backgroundWorker.DoWork += ReadInputFileWorker;
-            backgroundWorker.RunWorkerCompleted += ReadInputFileWorkerCompleted;
-#pragma warning restore CS8622
-            backgroundWorker.RunWorkerAsync(filePathName);
-        }
-
-        private void ReadInputFileWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            if (e.Result is Exception)
-            {
-                var num =
-                    (int)
-                    // ReSharper disable once StringLiteralTypo
-                    MessageBox.Show(@"An exception happened: \n" + e.Result, @"Ooops...", MessageBoxButtons.OK,
-                        MessageBoxIcon.Hand);
-            }
-            else
-            {
-                foreach (var node in (List<TreeNode>) e.Result!)
-                    _treeViewContents.Nodes.Add(node);
-            }
-            _progressBar.Visible = false;
-            _btnSelectInputFile.Enabled = true;
-            _btnUnpack.Enabled = true;
-            _btnSelectAll.Enabled = true;
-            _btnDeselectAll.Enabled = true;
-            _btnExpand.Enabled = true;
-            _btnCollapse.Enabled = true;
-            _btnExit.Enabled = true;
-        }
-        // iterate for the next person as a warning to not change what isn't broken
-        // time wasted on this method 4 hours
-        private void ReadInputFileWorker(object sender, DoWorkEventArgs e)
-        {
-            try
-            {
-                var treeNodes = new List<TreeNode>();
-                _mTmpUnpackedOutputPathForUi = _mKu.GetTempPath();
-                _unpacks.Add(_mTmpUnpackedOutputPathForUi);
-                _mRemapInfo = _mKu.Unpack(e.Argument!.ToString(), _mTmpUnpackedOutputPathForUi, _mTmpUnpackedOutputPathForUi);
-
-                // Create a dictionary to hold the parent nodes for each directory path
-                var directoryNodes = new Dictionary<string, TreeNode>();
-
-                // Iterate over each file in the remap info and create a tree node for it
-                foreach (var keyValuePair in _mRemapInfo)
-                {
-                    if (File.Exists(keyValuePair.Key))
-                    {
-                        var relativePath = keyValuePair.Value.Replace(_mTmpUnpackedOutputPathForUi, "");
-
-                        // Create a list of directory names in the relative path
-                        var directories = new List<string>(relativePath.Split(Path.DirectorySeparatorChar.ToString()));
-
-                        // Remove any empty directory names
-                        directories.RemoveAll(string.IsNullOrEmpty);
-
-                        // Remove the file name from the list of directories
-                        directories.RemoveAt(directories.Count - 1);
-
-                        // Initialize the parent node to null
-                        TreeNode? parentNode = null;
-
-                        // Traverse the list of directory names and create nodes for them
-                        foreach (var directory in directories)
-                        {
-                            // Check if the parent node already exists
-                            if (!directoryNodes.TryGetValue(directory, out var directoryNode))
-                            {
-                                // Create a new directory node and add it to the parent node
-                                directoryNode = new TreeNode(directory) { Checked = true};
-                                directoryNodes[directory] = directoryNode;
-                                if (parentNode == null)
-                                {
-                                    treeNodes.Add(directoryNode);
-                                }
-                                else
-                                {
-                                    parentNode.Nodes.Add(directoryNode);
-                                }
-                            }
-
-                            // Set the current directory node as the parent for the next directory node
-                            parentNode = directoryNode;
-                        }
-                        var text = keyValuePair.Value.Split('\\').Last();
-                        
-
-                        // Create the file node and add it to the final parent node
-                        var fileNode = new TreeNode(relativePath) { Checked = true, Tag = keyValuePair, Text = text };
-
-                        // Add the final file node to its parent node, if it exists
-                        if (parentNode != null)
-                        {
-                            parentNode.Nodes.Add(fileNode);
-                        }
-                        else
-                        {
-                            treeNodes.Add(fileNode);
-                        }
-                    }
-                }
-
-                // Set the result to the root nodes of the tree
-                e.Result = treeNodes;
-            }
-            catch (Exception ex)
-            {
-                e.Result = ex;
-            }
-        }
-
-       
-
-        private void UnpackInputFileWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            _btnAbout.Enabled = true;
-            _btnSelectInputFile.Enabled = true;
-            _btnUnpack.Enabled = false;
-            _btnExit.Enabled = true;
-            _progressBar.Visible = false;
-        }
-
-       private void UnpackInputFileWorker(object sender, DoWorkEventArgs e)
-        {
-            if (!Directory.Exists(_saveToFolderDialog.SelectedPath))
-                Directory.CreateDirectory(_saveToFolderDialog.SelectedPath);
-            var map = new Dictionary<string, string>();
-            var dictionary = new Dictionary<string, string>();
-            foreach (var treeNode in Collect(_treeViewContents.Nodes))
-            {
-                if(treeNode.Tag == null) continue;
-                if (treeNode.Checked)
-                    dictionary.Add(((KeyValuePair<string, string>)treeNode.Tag).Key,
-                        ((KeyValuePair<string, string>)treeNode.Tag).Value);
-            }
-            foreach (var keyValuePair in dictionary)
-                map[keyValuePair.Key] = keyValuePair.Value.Replace(_mTmpUnpackedOutputPathForUi!,
-                    _saveToFolderDialog.SelectedPath);
-            _mKu.RemapFiles(map);
-        }
-       IEnumerable<TreeNode> Collect(TreeNodeCollection nodes)
-        {
-            foreach(TreeNode node in nodes)
-            {
-                yield return node;
-
-                foreach (var child in Collect(node.Nodes))
-                    yield return child;
-            }
-        }
-        private void Cleanup(object sender, EventArgs e)
-        {
-            foreach (var unpack in _unpacks)
-            {
-                if (unpack == null || !Directory.Exists(unpack))
-                    return;
-                Directory.Delete(unpack, true);
-            }
-        }
-        private void treeViewContents_AfterSelect(object sender, TreeViewEventArgs e)
-        {
-            // Check if the selected node is a parent node
-            if (e.Node.Nodes.Count > 0)
-            {
-                // Select all the child nodes recursively
-                foreach (TreeNode childNode in e.Node.Nodes)
-                {
-                    childNode.Checked = e.Node.Checked;
-                }
-            }
-        }
-        private void treeViewContents_BeforeSelect(object sender, TreeViewCancelEventArgs e)
-        {
-            if (e.Node.Nodes.Contains(e.Node))
-            {
-                e.Cancel = true;
-            }
-        }
-
-        private void UpuGui_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            Cleanup(sender, e);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && components != null!)
-                components.Dispose();
-            base.Dispose(disposing);
-        }
-
         private void InitializeComponent()
         {
             ComponentResourceManager resources = new ComponentResourceManager(typeof(UpuGui));
@@ -550,6 +328,224 @@ namespace UpuGui
             PerformLayout();
 
         }
+        
+        
+        private void Form1_DragEnter(object sender, DragEventArgs e)
+        {
+            if (!e.Data!.GetDataPresent(DataFormats.FileDrop))
+                return;
+            e.Effect = DragDropEffects.Copy;
+        }
+
+        private void Form1_DragDrop(object sender, DragEventArgs e)
+        {
+            var strArray = (string[]) e.Data!.GetData(DataFormats.FileDrop)!;
+            if (strArray.Length <= 0)
+                return;
+            OpenFile(strArray[0]);
+        }
+
+        private void ShellHandlerCheckTimer_Tick(object sender, EventArgs e)
+        {
+            _btnRegisterUnregister.Text = _mUpu.IsContextMenuHandlerRegistered() ? @"Unregister Explorer Context Menu Handler" : @"Register Explorer Context Menu Handler";
+            _btnRegisterUnregister.Enabled = true;
+        }
+
+        private void OpenFile(string filePathName)
+        {
+            _groupBox.Text = new FileInfo(filePathName).Name;
+            _btnExit.Enabled = false;
+            _btnSelectInputFile.Enabled = false;
+            _progressBar.Visible = true;
+            _treeViewContents.Nodes.Clear();
+            var backgroundWorker = new BackgroundWorker();
+#pragma warning disable CS8622
+            backgroundWorker.DoWork += ReadInputFileWorker;
+            backgroundWorker.RunWorkerCompleted += ReadInputFileWorkerCompleted;
+#pragma warning restore CS8622
+            backgroundWorker.RunWorkerAsync(filePathName);
+        }
+
+        private void ReadInputFileWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (e.Result is Exception)
+            {
+                var num =
+                    (int)
+                    // ReSharper disable once StringLiteralTypo
+                    MessageBox.Show(@"An exception happened: \n" + e.Result, @"Ooops...", MessageBoxButtons.OK,
+                        MessageBoxIcon.Hand);
+            }
+            else
+            {
+                foreach (var node in (List<TreeNode>) e.Result!)
+                    _treeViewContents.Nodes.Add(node);
+            }
+            _progressBar.Visible = false;
+            _btnSelectInputFile.Enabled = true;
+            _btnUnpack.Enabled = true;
+            _btnSelectAll.Enabled = true;
+            _btnDeselectAll.Enabled = true;
+            _btnExpand.Enabled = true;
+            _btnCollapse.Enabled = true;
+            _btnExit.Enabled = true;
+        }
+        // iterate for the next person as a warning to not change what isn't broken
+        // time wasted on this method 4 hours
+        private void ReadInputFileWorker(object sender, DoWorkEventArgs e)
+        {
+            try
+            {
+                var treeNodes = new List<TreeNode>();
+                _mTmpUnpackedOutputPathForUi = _mKu.GetTempPath();
+                _unpacks.Add(_mTmpUnpackedOutputPathForUi);
+                _mRemapInfo = _mKu.Unpack(e.Argument!.ToString(), _mTmpUnpackedOutputPathForUi, _mTmpUnpackedOutputPathForUi);
+
+                // Create a dictionary to hold the parent nodes for each directory path
+                var directoryNodes = new Dictionary<string, TreeNode>();
+
+                // Iterate over each file in the remap info and create a tree node for it
+                foreach (var keyValuePair in _mRemapInfo)
+                {
+                    if (File.Exists(keyValuePair.Key))
+                    {
+                        var relativePath = keyValuePair.Value.Replace(_mTmpUnpackedOutputPathForUi, "");
+
+                        // Create a list of directory names in the relative path
+                        var directories = new List<string>(relativePath.Split(Path.DirectorySeparatorChar.ToString()));
+
+                        // Remove any empty directory names
+                        directories.RemoveAll(string.IsNullOrEmpty);
+
+                        // Remove the file name from the list of directories
+                        directories.RemoveAt(directories.Count - 1);
+
+                        // Initialize the parent node to null
+                        TreeNode? parentNode = null;
+
+                        // Traverse the list of directory names and create nodes for them
+                        foreach (var directory in directories)
+                        {
+                            // Check if the parent node already exists
+                            if (!directoryNodes.TryGetValue(directory, out var directoryNode))
+                            {
+                                // Create a new directory node and add it to the parent node
+                                directoryNode = new TreeNode(directory) { Checked = true};
+                                directoryNodes[directory] = directoryNode;
+                                if (parentNode == null)
+                                {
+                                    treeNodes.Add(directoryNode);
+                                }
+                                else
+                                {
+                                    parentNode.Nodes.Add(directoryNode);
+                                }
+                            }
+
+                            // Set the current directory node as the parent for the next directory node
+                            parentNode = directoryNode;
+                        }
+                        var text = keyValuePair.Value.Split('\\').Last();
+                        
+
+                        // Create the file node and add it to the final parent node
+                        var fileNode = new TreeNode(relativePath) { Checked = true, Tag = keyValuePair, Text = text };
+
+                        // Add the final file node to its parent node, if it exists
+                        if (parentNode != null)
+                        {
+                            parentNode.Nodes.Add(fileNode);
+                        }
+                        else
+                        {
+                            treeNodes.Add(fileNode);
+                        }
+                    }
+                }
+
+                // Set the result to the root nodes of the tree
+                e.Result = treeNodes;
+            }
+            catch (Exception ex)
+            {
+                e.Result = ex;
+            }
+        }
+
+       
+
+        private void UnpackInputFileWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            _btnAbout.Enabled = true;
+            _btnSelectInputFile.Enabled = true;
+            _btnUnpack.Enabled = false;
+            _btnExit.Enabled = true;
+            _progressBar.Visible = false;
+        }
+
+       private void UnpackInputFileWorker(object sender, DoWorkEventArgs e)
+        {
+            if (!Directory.Exists(_saveToFolderDialog.SelectedPath))
+                Directory.CreateDirectory(_saveToFolderDialog.SelectedPath);
+            var map = new Dictionary<string, string>();
+            var dictionary = new Dictionary<string, string>();
+            foreach (var treeNode in Collect(_treeViewContents.Nodes))
+            {
+                if(treeNode.Tag == null) continue;
+                if (treeNode.Checked)
+                    dictionary.Add(((KeyValuePair<string, string>)treeNode.Tag).Key,
+                        ((KeyValuePair<string, string>)treeNode.Tag).Value);
+            }
+            foreach (var keyValuePair in dictionary)
+                map[keyValuePair.Key] = keyValuePair.Value.Replace(_mTmpUnpackedOutputPathForUi!,
+                    _saveToFolderDialog.SelectedPath);
+            _mKu.RemapFiles(map);
+        }
+       IEnumerable<TreeNode> Collect(TreeNodeCollection nodes)
+        {
+            foreach(TreeNode node in nodes)
+            {
+                yield return node;
+
+                foreach (var child in Collect(node.Nodes))
+                    yield return child;
+            }
+        }
+       private void treeViewContents_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            // Check if the selected node is a parent node
+            if (e.Node.Nodes.Count > 0)
+            {
+                // Select all the child nodes recursively
+                foreach (TreeNode childNode in e.Node.Nodes)
+                {
+                    childNode.Checked = e.Node.Checked;
+                }
+            }
+        }
+        private void treeViewContents_BeforeSelect(object sender, TreeViewCancelEventArgs e)
+        {
+            if (e.Node.Nodes.Contains(e.Node))
+            {
+                e.Cancel = true;
+            }
+        }
+        
+        private void Cleanup(object sender, EventArgs e)
+        {
+            foreach (var unpack in _unpacks)
+            {
+                if (unpack == null || !Directory.Exists(unpack))
+                    return;
+                Directory.Delete(unpack, true);
+            }
+        }
+
+        private void UpuGui_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Cleanup(sender, e);
+        }
+        
 
         private void btnSelectInputFile_Click_1(object sender, EventArgs e)
         {
@@ -634,6 +630,13 @@ namespace UpuGui
             {
                 node.Collapse();
             }
+        }
+        
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && components != null!)
+                components.Dispose();
+            base.Dispose(disposing);
         }
     }
 }
