@@ -99,10 +99,10 @@ namespace UpuGui.UpuConsole
             try
             {
                 if (register)
-                    RegisterShellHandler("Unity package file", "unpack", "Unpack here",
+                    RegisterShellHandler(".UnityPackage", "unpack", "Unpack here",
                         $"\"{Process.GetCurrentProcess().MainModule!.FileName}\" \"--input=%L\"");
                 else
-                    UnregisterShellHandler("Unity package file", "Unpack");
+                    UnregisterShellHandler(".UnityPackage", "unpack");
             }
             catch (UnauthorizedAccessException)
             {
@@ -129,15 +129,15 @@ namespace UpuGui.UpuConsole
 
         private void RegisterShellHandler(string fileType, string shellKeyName, string menuText, string menuCommand)
         {
-            using (var subKey = Registry.ClassesRoot.CreateSubKey($"{fileType}\\shell\\{shellKeyName}"))
+            using (var subKey = Registry.ClassesRoot.CreateSubKey($"SystemFileAssociations\\{fileType}\\shell\\{shellKeyName}"))
             {
                 subKey.SetValue(null, menuText);
             }
-            using (var iconKey = Registry.ClassesRoot.CreateSubKey($"{fileType}\\shell\\{shellKeyName}"))
+            using (var iconKey = Registry.ClassesRoot.CreateSubKey($"SystemFileAssociations\\{fileType}\\shell\\{shellKeyName}"))
             {
                 iconKey.SetValue("Icon", Process.GetCurrentProcess().MainModule!.FileName);
             }
-            using (var subKey = Registry.ClassesRoot.CreateSubKey($"{fileType}\\shell\\{shellKeyName}\\command"))
+            using (var subKey = Registry.ClassesRoot.CreateSubKey($"SystemFileAssociations\\{fileType}\\shell\\{shellKeyName}\\command"))
             {
                 subKey.SetValue(null, menuCommand);
             }
@@ -145,15 +145,15 @@ namespace UpuGui.UpuConsole
 
         private void UnregisterShellHandler(string fileType, string shellKeyName)
         {
-            if (string.IsNullOrEmpty(fileType) || string.IsNullOrEmpty(shellKeyName) ||
+            if (string.IsNullOrEmpty($"SystemFileAssociations\\{fileType}") || string.IsNullOrEmpty(shellKeyName) ||
                 !IsContextMenuHandlerRegistered())
                 return;
-            Registry.ClassesRoot.DeleteSubKeyTree("Unity package file\\shell\\Unpack");
+            Registry.ClassesRoot.DeleteSubKeyTree($"SystemFileAssociations\\{fileType}");
         }
 
         public bool IsContextMenuHandlerRegistered()
         {
-            var registryKey = Registry.ClassesRoot.OpenSubKey("Unity package file\\shell\\Unpack\\command");
+            var registryKey = Registry.ClassesRoot.OpenSubKey("SystemFileAssociations\\.Unitypackage\\shell\\Unpack\\command");
             return (registryKey != null) && (registryKey.GetValue(null) != null);
         }
 
