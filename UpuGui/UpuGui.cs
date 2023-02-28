@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 using UpuGui.UpuCore;
@@ -130,34 +131,86 @@ namespace UpuGui
             _btnDeselectAll.Enabled = true;
             _btnExit.Enabled = true;
         }
-
+        // iterate for the next person as a warning to not change what isn't broken
+        // time wasted on this method 4 hours
         private void ReadInputFileWorker(object sender, DoWorkEventArgs e)
         {
-            var list = new List<TreeNode>();
             try
             {
+                var treeNodes = new List<TreeNode>();
                 _mTmpUnpackedOutputPathForUi = _mKu.GetTempPath();
-                _mRemapInfo = _mKu.Unpack(e.Argument!.ToString(), _mTmpUnpackedOutputPathForUi);
+                _unpacks.Add(_mTmpUnpackedOutputPathForUi);
+                _mRemapInfo = _mKu.Unpack(e.Argument!.ToString(), _mTmpUnpackedOutputPathForUi, _mTmpUnpackedOutputPathForUi);
+
+                // Create a dictionary to hold the parent nodes for each directory path
+                var directoryNodes = new Dictionary<string, TreeNode>();
+
+                // Iterate over each file in the remap info and create a tree node for it
                 foreach (var keyValuePair in _mRemapInfo)
+                {
                     if (File.Exists(keyValuePair.Key))
                     {
-                        var text = keyValuePair.Value.Replace(_mTmpUnpackedOutputPathForUi, "");
-                        if (text.StartsWith(Path.DirectorySeparatorChar.ToString()))
-                            text = text.Substring(1);
-                        list.Add(new TreeNode(text)
+                        var relativePath = keyValuePair.Value.Replace(_mTmpUnpackedOutputPathForUi, "");
+
+                        // Create a list of directory names in the relative path
+                        var directories = new List<string>(relativePath.Split(Path.DirectorySeparatorChar.ToString()));
+
+                        // Remove any empty directory names
+                        directories.RemoveAll(string.IsNullOrEmpty);
+
+                        // Remove the file name from the list of directories
+                        directories.RemoveAt(directories.Count - 1);
+
+                        // Initialize the parent node to null
+                        TreeNode? parentNode = null;
+
+                        // Traverse the list of directory names and create nodes for them
+                        foreach (var directory in directories)
                         {
-                            Checked = true,
-                            Tag = keyValuePair
-                        });
+                            // Check if the parent node already exists
+                            if (!directoryNodes.TryGetValue(directory, out var directoryNode))
+                            {
+                                // Create a new directory node and add it to the parent node
+                                directoryNode = new TreeNode(directory) { Checked = true};
+                                directoryNodes[directory] = directoryNode;
+                                if (parentNode == null)
+                                {
+                                    treeNodes.Add(directoryNode);
+                                }
+                                else
+                                {
+                                    parentNode.Nodes.Add(directoryNode);
+                                }
+                            }
+
+                            // Set the current directory node as the parent for the next directory node
+                            parentNode = directoryNode;
+                        }
+                        var text = keyValuePair.Value.Split('\\').Last();
+                        
+
+                        // Create the file node and add it to the final parent node
+                        var fileNode = new TreeNode(relativePath) { Checked = true, Tag = keyValuePair, Text = text };
+
+                        // Add the final file node to its parent node, if it exists
+                        if (parentNode != null)
+                        {
+                            parentNode.Nodes.Add(fileNode);
+                        }
+                        else
+                        {
+                            treeNodes.Add(fileNode);
+                        }
                     }
-                list.Sort((t1, t2) => string.Compare(t1.Text, t2.Text, StringComparison.Ordinal));
+                }
+
+                // Set the result to the root nodes of the tree
+                e.Result = treeNodes;
             }
             catch (Exception ex)
             {
                 e.Result = ex;
-                return;
             }
-            e.Result = list;
         }
 
        
@@ -171,23 +224,35 @@ namespace UpuGui
             _progressBar.Visible = false;
         }
 
-        private void UnpackInputFileWorker(object sender, DoWorkEventArgs e)
+       private void UnpackInputFileWorker(object sender, DoWorkEventArgs e)
         {
             if (!Directory.Exists(_saveToFolderDialog.SelectedPath))
                 Directory.CreateDirectory(_saveToFolderDialog.SelectedPath);
             var map = new Dictionary<string, string>();
             var dictionary = new Dictionary<string, string>();
-            foreach (TreeNode treeNode in _treeViewContents.Nodes)
+            foreach (var treeNode in Collect(_treeViewContents.Nodes))
+            {
+                if(treeNode.Tag == null) continue;
                 if (treeNode.Checked)
-                    dictionary.Add(((KeyValuePair<string, string>) treeNode.Tag).Key,
-                        ((KeyValuePair<string, string>) treeNode.Tag).Value);
+                    dictionary.Add(((KeyValuePair<string, string>)treeNode.Tag).Key,
+                        ((KeyValuePair<string, string>)treeNode.Tag).Value);
+            }
             foreach (var keyValuePair in dictionary)
                 map[keyValuePair.Key] = keyValuePair.Value.Replace(_mTmpUnpackedOutputPathForUi!,
                     _saveToFolderDialog.SelectedPath);
             _mKu.RemapFiles(map);
         }
+       IEnumerable<TreeNode> Collect(TreeNodeCollection nodes)
+        {
+            foreach(TreeNode node in nodes)
+            {
+                yield return node;
 
-        private void Cleanup()
+                foreach (var child in Collect(node.Nodes))
+                    yield return child;
+            }
+        }
+        private void Cleanup(object sender, EventArgs e)
         {
             foreach (var unpack in _unpacks)
             {
@@ -198,6 +263,22 @@ namespace UpuGui
         }
         private void treeViewContents_AfterSelect(object sender, TreeViewEventArgs e)
         {
+            // Check if the selected node is a parent node
+            if (e.Node.Nodes.Count > 0)
+            {
+                // Select all the child nodes recursively
+                foreach (TreeNode childNode in e.Node.Nodes)
+                {
+                    childNode.Checked = e.Node.Checked;
+                }
+            }
+        }
+        private void treeViewContents_BeforeSelect(object sender, TreeViewCancelEventArgs e)
+        {
+            if (e.Node.Nodes.Contains(e.Node))
+            {
+                e.Cancel = true;
+            }
         }
 
         private void UpuGui_FormClosed(object sender, FormClosedEventArgs e)
@@ -327,6 +408,11 @@ namespace UpuGui
             _treeViewContents.Name = "_treeViewContents";
             _treeViewContents.Size = new Size(624, 312);
             _treeViewContents.TabIndex = 5;
+#pragma warning disable CS8622
+            _treeViewContents.AfterSelect += treeViewContents_AfterSelect;
+            _treeViewContents.AfterCheck += treeViewContents_AfterSelect;
+            _treeViewContents.BeforeSelect += treeViewContents_BeforeSelect;
+#pragma warning restore CS8622
             // 
             // _btnExit
             // 
@@ -460,14 +546,27 @@ namespace UpuGui
 
         private void btnSelectAll_Click_1(object sender, EventArgs e)
         {
-            foreach (TreeNode treeNode in _treeViewContents.Nodes)
-                treeNode.Checked = true;
+            foreach (TreeNode node in _treeViewContents.Nodes)
+            {
+                CheckNode(node, true);
+            }
         }
 
         private void btnDeselectAll_Click_1(object sender, EventArgs e)
         {
-            foreach (TreeNode treeNode in _treeViewContents.Nodes)
-                treeNode.Checked = false;
+            foreach (TreeNode node in _treeViewContents.Nodes)
+            {
+                CheckNode(node, false);
+            }
+        }
+
+        private void CheckNode(TreeNode node, bool isChecked)
+        {
+            node.Checked = isChecked;
+            foreach (TreeNode childNode in node.Nodes)
+            {
+                CheckNode(childNode, isChecked);
+            }
         }
 
         private void btnExit_Click_1(object sender, EventArgs e)
