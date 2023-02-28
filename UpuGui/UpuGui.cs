@@ -27,6 +27,7 @@ namespace UpuGui
         private readonly KissUnpacker _mKu;
         private Dictionary<string, string> _mRemapInfo;
         private string? _mTmpUnpackedOutputPathForUi;
+        private readonly List<string> _unpacks = new();
         private readonly UpuConsole.UpuConsole _mUpu;
         private OpenFileDialog _openFileDialog;
         private ProgressBar _progressBar;
@@ -45,6 +46,7 @@ namespace UpuGui
             _treeViewContents!.CheckBoxes = true;
             AllowDrop = true;
 #pragma warning disable CS8622
+            AppDomain.CurrentDomain.ProcessExit += Cleanup;
             FormClosed += UpuGui_FormClosed;
             DragEnter += Form1_DragEnter;
             DragDrop += Form1_DragDrop;
@@ -54,8 +56,7 @@ namespace UpuGui
             upuGui.Text = str;
         }
 
-        public UpuGui(UpuConsole.UpuConsole upu)
-            : this()
+        public UpuGui(UpuConsole.UpuConsole upu) : this()
         {
             _mUpu = upu;
             if (upu.IsContextMenuHandlerRegistered())
@@ -187,9 +188,12 @@ namespace UpuGui
 
         private void Cleanup()
         {
-            if ((_mTmpUnpackedOutputPathForUi == null) || !Directory.Exists(_mTmpUnpackedOutputPathForUi))
-                return;
-            Directory.Delete(_mTmpUnpackedOutputPathForUi, true);
+            foreach (var unpack in _unpacks)
+            {
+                if (unpack == null || !Directory.Exists(unpack))
+                    return;
+                Directory.Delete(unpack, true);
+            }
         }
         private void treeViewContents_AfterSelect(object sender, TreeViewEventArgs e)
         {
@@ -197,7 +201,7 @@ namespace UpuGui
 
         private void UpuGui_FormClosed(object sender, FormClosedEventArgs e)
         {
-            Cleanup();
+            Cleanup(sender, e);
         }
 
         protected override void Dispose(bool disposing)
