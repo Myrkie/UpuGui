@@ -14,15 +14,14 @@ namespace UpuGui
 {
     public sealed class UpuGui : Form
     {
-        private Button _btnDeselectAll;
         private Button _btnExit;
         private Button _btnRegisterUnregister;
-        private Button _btnSelectAll;
         private Button _btnSelectInputFile;
         private Button _btnUnpack;
         private Button _btnAbout;
         private Button _btnExpand;
         private Button _btnCollapse;
+        private CheckBox _chkBoxSelectAll;
 #pragma warning disable CS0649
         private IContainer components;
 #pragma warning restore CS0649
@@ -43,8 +42,7 @@ namespace UpuGui
             InitializeComponent();
             _btnUnpack!.Enabled = false;
             _btnAbout!.Enabled = true;
-            _btnSelectAll!.Enabled = false;
-            _btnDeselectAll!.Enabled = false;
+            _chkBoxSelectAll!.Enabled = false;
             _btnExpand!.Enabled = false;
             _btnCollapse!.Enabled = false;
             _progressBar!.Visible = false;
@@ -87,8 +85,7 @@ namespace UpuGui
             _groupBox = new GroupBox();
             _btnExpand = new Button();
             _btnCollapse = new Button();
-            _btnDeselectAll = new Button();
-            _btnSelectAll = new Button();
+            _chkBoxSelectAll = new CheckBox();
             _treeViewContents = new TreeView();
             _openFileDialog = new OpenFileDialog();
             _btnExit = new Button();
@@ -98,38 +95,6 @@ namespace UpuGui
             _groupBox.SuspendLayout();
             SuspendLayout();
             // 
-            // _btnUnpack
-            // 
-            _btnUnpack.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            _btnUnpack.Image = (Image)resources.GetObject("_btnUnpack.Image");
-            _btnUnpack.ImageAlign = ContentAlignment.MiddleLeft;
-            _btnUnpack.Location = new Point(170, 429);
-            _btnUnpack.Margin = new Padding(4, 4, 4, 4);
-            _btnUnpack.Name = "_btnUnpack";
-            _btnUnpack.Size = new Size(149, 38);
-            _btnUnpack.TabIndex = 8;
-            _btnUnpack.Text = @"Unpack now";
-            _btnUnpack.UseVisualStyleBackColor = true;
-#pragma warning disable CS8622
-            _btnUnpack.Click += btnUnpack_Click_1;
-#pragma warning restore CS8622
-            // 
-            // _btnSelectInputFile
-            // 
-            _btnSelectInputFile.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            _btnSelectInputFile.Image = (Image)resources.GetObject("_btnSelectInputFile.Image");
-            _btnSelectInputFile.ImageAlign = ContentAlignment.MiddleLeft;
-            _btnSelectInputFile.Location = new Point(14, 429);
-            _btnSelectInputFile.Margin = new Padding(4, 4, 4, 4);
-            _btnSelectInputFile.Name = "_btnSelectInputFile";
-            _btnSelectInputFile.Size = new Size(149, 38);
-            _btnSelectInputFile.TabIndex = 7;
-            _btnSelectInputFile.Text = @"Select Input File";
-            _btnSelectInputFile.UseVisualStyleBackColor = true;
-#pragma warning disable CS8622
-            _btnSelectInputFile.Click += btnSelectInputFile_Click_1;
-#pragma warning restore CS8622
-            // 
             // _groupBox
             // 
             _groupBox.Anchor = ((AnchorStyles.Top | AnchorStyles.Bottom) 
@@ -137,18 +102,36 @@ namespace UpuGui
                               | AnchorStyles.Right;
             _groupBox.Controls.Add(_btnExpand);
             _groupBox.Controls.Add(_btnCollapse);
-            _groupBox.Controls.Add(_btnDeselectAll);
-            _groupBox.Controls.Add(_btnSelectAll);
             _groupBox.Controls.Add(_treeViewContents);
+            _groupBox.Controls.Add(_chkBoxSelectAll);
             _groupBox.Location = new Point(14, 14);
             _groupBox.Margin = new Padding(4, 4, 4, 4);
             _groupBox.Name = "_groupBox";
             _groupBox.Padding = new Padding(4, 4, 4, 4);
             _groupBox.Size = new Size(638, 375);
-            _groupBox.TabIndex = 3;
+            _groupBox.TabIndex = 1;
             _groupBox.TabStop = false;
             // ReSharper disable once StringLiteralTypo
             _groupBox.Text = @"Unitypackage File";
+            // 
+            // _treeViewContents
+            // 
+            _treeViewContents.Anchor = AnchorStyles.Top |
+                                       AnchorStyles.Bottom | 
+                                       AnchorStyles.Left | 
+                                       AnchorStyles.Right;
+            _treeViewContents.CheckBoxes = true;
+            _treeViewContents.HotTracking = true;
+            _treeViewContents.Location = new Point(7, 22);
+            _treeViewContents.Margin = new Padding(4, 4, 4, 4);
+            _treeViewContents.Name = "_treeViewContents";
+            _treeViewContents.Size = new Size(624, 312);
+            _treeViewContents.TabIndex = 2;
+#pragma warning disable CS8622
+            _treeViewContents.AfterSelect += treeViewContents_AfterSelect;
+            _treeViewContents.AfterCheck += treeViewContents_AfterSelect;
+            _treeViewContents.BeforeSelect += treeViewContents_BeforeSelect;
+#pragma warning restore CS8622
             // 
             // _btnExpand
             // 
@@ -159,7 +142,7 @@ namespace UpuGui
             _btnExpand.Margin = new Padding(4);
             _btnExpand.Name = "_btnExpand";
             _btnExpand.Size = new Size(70, 26);
-            _btnExpand.TabIndex = 1;
+            _btnExpand.TabIndex = 3;
             _btnExpand.Text = @"Expand";
             _btnExpand.TextAlign = ContentAlignment.MiddleRight;
             _btnExpand.UseVisualStyleBackColor = true;
@@ -176,7 +159,7 @@ namespace UpuGui
             _btnCollapse.Margin = new Padding(4);
             _btnCollapse.Name = "_btnCollapse";
             _btnCollapse.Size = new Size(70, 26);
-            _btnCollapse.TabIndex = 2;
+            _btnCollapse.TabIndex = 4;
             _btnCollapse.Text = @"Collapse";
             _btnCollapse.TextAlign = ContentAlignment.MiddleRight;
             _btnCollapse.UseVisualStyleBackColor = true;
@@ -184,94 +167,21 @@ namespace UpuGui
             _btnCollapse.Click += BtnCollapse_Click_1;
 #pragma warning restore CS8622
             // 
-            // _btnDeselectAll
+            // _chkBoxSelectAll
             // 
-            _btnDeselectAll.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            _btnDeselectAll.Image = (Image)resources.GetObject("_btnDeselectAll.Image");
-            _btnDeselectAll.ImageAlign = ContentAlignment.MiddleLeft;
-            _btnDeselectAll.Location = new Point(561, 341);
-            _btnDeselectAll.Margin = new Padding(4, 4, 4, 4);
-            _btnDeselectAll.Name = "_btnDeselectAll";
-            _btnDeselectAll.Size = new Size(70, 26);
-            _btnDeselectAll.TabIndex = 4;
-            _btnDeselectAll.Text = @"None";
-            _btnDeselectAll.TextAlign = ContentAlignment.MiddleRight;
-            _btnDeselectAll.UseVisualStyleBackColor = true;
+            _chkBoxSelectAll.Checked = true;
+            _chkBoxSelectAll.CheckState = CheckState.Checked;
+            _chkBoxSelectAll.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            _chkBoxSelectAll.Location = new Point(527, 343);
+            _chkBoxSelectAll.Margin = new Padding(4, 4, 4, 4);
+            _chkBoxSelectAll.Name = "_chkBoxSelectAll";
+            _chkBoxSelectAll.Size = new Size(85, 24);
+            _chkBoxSelectAll.TabIndex = 5;
+            _chkBoxSelectAll.Text = @"Select All";
+            _chkBoxSelectAll.UseVisualStyleBackColor = true;
 #pragma warning disable CS8622
-            _btnDeselectAll.Click += btnDeselectAll_Click_1;
+            _chkBoxSelectAll.CheckedChanged += checkBox1_CheckedChanged;
 #pragma warning restore CS8622
-            // 
-            // _btnSelectAll
-            // 
-            _btnSelectAll.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            _btnSelectAll.Image = (Image)resources.GetObject("_btnSelectAll.Image");
-            _btnSelectAll.ImageAlign = ContentAlignment.MiddleLeft;
-            _btnSelectAll.Location = new Point(484, 341);
-            _btnSelectAll.Margin = new Padding(4, 4, 4, 4);
-            _btnSelectAll.Name = "_btnSelectAll";
-            _btnSelectAll.Size = new Size(70, 26);
-            _btnSelectAll.TabIndex = 3;
-            _btnSelectAll.Text = @"All";
-            _btnSelectAll.TextAlign = ContentAlignment.MiddleRight;
-            _btnSelectAll.UseVisualStyleBackColor = true;
-#pragma warning disable CS8622
-            _btnSelectAll.Click += btnSelectAll_Click_1;
-#pragma warning restore CS8622
-            // 
-            // _treeViewContents
-            // 
-            _treeViewContents.Anchor = (AnchorStyles.Top | AnchorStyles.Bottom 
-                                                         | AnchorStyles.Left) 
-                                      | AnchorStyles.Right;
-            _treeViewContents.CheckBoxes = true;
-            _treeViewContents.HotTracking = true;
-            _treeViewContents.Location = new Point(7, 22);
-            _treeViewContents.Margin = new Padding(4, 4, 4, 4);
-            _treeViewContents.Name = "_treeViewContents";
-            _treeViewContents.Size = new Size(624, 312);
-            _treeViewContents.TabIndex = 8;
-#pragma warning disable CS8622
-            _treeViewContents.AfterSelect += treeViewContents_AfterSelect;
-            _treeViewContents.AfterCheck += treeViewContents_AfterSelect;
-            _treeViewContents.BeforeSelect += treeViewContents_BeforeSelect;
-#pragma warning restore CS8622
-            // 
-            // _btnExit
-            // 
-            _btnExit.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            _btnExit.Image = (Image)resources.GetObject("_btnExit.Image");
-            _btnExit.ImageAlign = ContentAlignment.MiddleLeft;
-            _btnExit.Location = new Point(503, 429);
-            _btnExit.Margin = new Padding(4, 4, 4, 4);
-            _btnExit.Name = "_btnExit";
-            _btnExit.Size = new Size(149, 38);
-            _btnExit.TabIndex = 9;
-            _btnExit.Text = @"Exit";
-            _btnExit.UseVisualStyleBackColor = true;
-#pragma warning disable CS8622
-            _btnExit.Click += btnExit_Click_1;
-#pragma warning restore CS8622
-            // 
-            // _statusStrip1
-            // 
-            _statusStrip1.Location = new Point(0, 473);
-            _statusStrip1.Name = "_statusStrip1";
-            _statusStrip1.Padding = new Padding(1, 0, 16, 0);
-            _statusStrip1.Size = new Size(666, 22);
-            _statusStrip1.TabIndex = 10;
-            _statusStrip1.Text = @"statusStrip1";
-            // 
-            // _progressBar
-            // 
-            _progressBar.Anchor = (AnchorStyles.Bottom | AnchorStyles.Left) 
-                                 | AnchorStyles.Right;
-            _progressBar.Location = new Point(14, 472);
-            _progressBar.Margin = new Padding(4, 4, 4, 4);
-            _progressBar.MarqueeAnimationSpeed = 200;
-            _progressBar.Name = "_progressBar";
-            _progressBar.Size = new Size(631, 16);
-            _progressBar.Style = ProgressBarStyle.Marquee;
-            _progressBar.TabIndex = 11;
             // 
             // _btnRegisterUnregister
             // 
@@ -280,7 +190,7 @@ namespace UpuGui
             _btnRegisterUnregister.Margin = new Padding(4, 4, 4, 4);
             _btnRegisterUnregister.Name = "_btnRegisterUnregister";
             _btnRegisterUnregister.Size = new Size(306, 26);
-            _btnRegisterUnregister.TabIndex = 5;
+            _btnRegisterUnregister.TabIndex = 6;
             _btnRegisterUnregister.Text = @"Register Context Menu Handler";
             _btnRegisterUnregister.UseVisualStyleBackColor = true;
 #pragma warning disable CS8622
@@ -296,12 +206,81 @@ namespace UpuGui
             _btnAbout.Margin = new Padding(4);
             _btnAbout.Name = "_btnAbout";
             _btnAbout.Size = new Size(100, 31);
-            _btnAbout.TabIndex = 6;
+            _btnAbout.TabIndex = 7;
             _btnAbout.Text = @"About";
             _btnAbout.UseVisualStyleBackColor = true;
 #pragma warning disable CS8622
             _btnAbout.Click += btnAbout_Click_1;
 #pragma warning restore CS8622
+            // 
+            // _btnSelectInputFile
+            // 
+            _btnSelectInputFile.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            _btnSelectInputFile.Image = (Image)resources.GetObject("_btnSelectInputFile.Image");
+            _btnSelectInputFile.ImageAlign = ContentAlignment.MiddleLeft;
+            _btnSelectInputFile.Location = new Point(14, 429);
+            _btnSelectInputFile.Margin = new Padding(4, 4, 4, 4);
+            _btnSelectInputFile.Name = "_btnSelectInputFile";
+            _btnSelectInputFile.Size = new Size(149, 38);
+            _btnSelectInputFile.TabIndex = 8;
+            _btnSelectInputFile.Text = @"Select Input File";
+            _btnSelectInputFile.UseVisualStyleBackColor = true;
+#pragma warning disable CS8622
+            _btnSelectInputFile.Click += btnSelectInputFile_Click_1;
+#pragma warning restore CS8622
+            // 
+            // _btnUnpack
+            // 
+            _btnUnpack.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            _btnUnpack.Image = (Image)resources.GetObject("_btnUnpack.Image");
+            _btnUnpack.ImageAlign = ContentAlignment.MiddleLeft;
+            _btnUnpack.Location = new Point(170, 429);
+            _btnUnpack.Margin = new Padding(4, 4, 4, 4);
+            _btnUnpack.Name = "_btnUnpack";
+            _btnUnpack.Size = new Size(149, 38);
+            _btnUnpack.TabIndex = 9;
+            _btnUnpack.Text = @"Unpack now";
+            _btnUnpack.UseVisualStyleBackColor = true;
+#pragma warning disable CS8622
+            _btnUnpack.Click += btnUnpack_Click_1;
+#pragma warning restore CS8622
+            // 
+            // _btnExit
+            // 
+            _btnExit.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            _btnExit.Image = (Image)resources.GetObject("_btnExit.Image");
+            _btnExit.ImageAlign = ContentAlignment.MiddleLeft;
+            _btnExit.Location = new Point(503, 429);
+            _btnExit.Margin = new Padding(4, 4, 4, 4);
+            _btnExit.Name = "_btnExit";
+            _btnExit.Size = new Size(149, 38);
+            _btnExit.TabIndex = 10;
+            _btnExit.Text = @"Exit";
+            _btnExit.UseVisualStyleBackColor = true;
+#pragma warning disable CS8622
+            _btnExit.Click += btnExit_Click_1;
+#pragma warning restore CS8622
+            // 
+            // _statusStrip1
+            // 
+            _statusStrip1.Location = new Point(0, 473);
+            _statusStrip1.Name = "_statusStrip1";
+            _statusStrip1.Padding = new Padding(1, 0, 16, 0);
+            _statusStrip1.Size = new Size(666, 22);
+            _statusStrip1.TabIndex = 11;
+            _statusStrip1.Text = @"statusStrip1";
+            // 
+            // _progressBar
+            // 
+            _progressBar.Anchor = (AnchorStyles.Bottom | AnchorStyles.Left) 
+                                 | AnchorStyles.Right;
+            _progressBar.Location = new Point(14, 472);
+            _progressBar.Margin = new Padding(4, 4, 4, 4);
+            _progressBar.MarqueeAnimationSpeed = 200;
+            _progressBar.Name = "_progressBar";
+            _progressBar.Size = new Size(631, 16);
+            _progressBar.Style = ProgressBarStyle.Marquee;
+            _progressBar.TabIndex = 12;
             // 
             // UpuGui
             // 
@@ -384,8 +363,7 @@ namespace UpuGui
             _progressBar.Visible = false;
             _btnSelectInputFile.Enabled = true;
             _btnUnpack.Enabled = true;
-            _btnSelectAll.Enabled = true;
-            _btnDeselectAll.Enabled = true;
+            _chkBoxSelectAll.Enabled = true;
             _btnExpand.Enabled = true;
             _btnCollapse.Enabled = true;
             _btnExit.Enabled = true;
@@ -583,31 +561,6 @@ namespace UpuGui
             _mUpu.RegisterUnregisterShellHandler(!_mUpu.IsContextMenuHandlerRegistered());
             _btnRegisterUnregister.Enabled = false;
         }
-
-        private void btnSelectAll_Click_1(object sender, EventArgs e)
-        {
-            foreach (TreeNode node in _treeViewContents.Nodes)
-            {
-                CheckNode(node, true);
-            }
-        }
-
-        private void btnDeselectAll_Click_1(object sender, EventArgs e)
-        {
-            foreach (TreeNode node in _treeViewContents.Nodes)
-            {
-                CheckNode(node, false);
-            }
-        }
-
-        private void CheckNode(TreeNode node, bool isChecked)
-        {
-            node.Checked = isChecked;
-            foreach (TreeNode childNode in node.Nodes)
-            {
-                CheckNode(childNode, isChecked);
-            }
-        }
         private void btnExit_Click_1(object sender, EventArgs e)
         {
             Application.Exit();
@@ -631,7 +584,30 @@ namespace UpuGui
                 node.Collapse();
             }
         }
-        
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if(_chkBoxSelectAll.Checked){
+                foreach (TreeNode node in _treeViewContents.Nodes)
+                {
+                    CheckNode(node, true);
+                }
+            }
+            else
+            {
+                foreach (TreeNode node in _treeViewContents.Nodes)
+                {
+                    CheckNode(node, false);
+                }
+            }
+        }
+        private void CheckNode(TreeNode node, bool isChecked)
+        {
+            node.Checked = isChecked;
+            foreach (TreeNode childNode in node.Nodes)
+            {
+                CheckNode(childNode, isChecked);
+            }
+        }
         protected override void Dispose(bool disposing)
         {
             if (disposing && components != null!)
