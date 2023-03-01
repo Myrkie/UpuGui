@@ -131,8 +131,8 @@ namespace UpuGui
             _treeViewContents.Size = new Size(624, 312);
             _treeViewContents.TabIndex = 2;
 #pragma warning disable CS8622
-            _treeViewContents.AfterSelect += treeViewContents_AfterSelect;
-            _treeViewContents.AfterCheck += treeViewContents_AfterSelect;
+            _treeViewContents.AfterSelect += treeViewContents_AfterCheck;
+            _treeViewContents.AfterCheck += treeViewContents_AfterCheck;
             _treeViewContents.BeforeSelect += treeViewContents_BeforeSelect;
 #pragma warning restore CS8622
             // 
@@ -518,7 +518,7 @@ namespace UpuGui
                     yield return child;
             }
         }
-       private static void treeViewContents_AfterSelect(object sender, TreeViewEventArgs e)
+       private static void treeViewContents_AfterCheck(object sender, TreeViewEventArgs e)
         {
             // Check if the selected node is a parent node
             if (e.Node.Nodes.Count > 0)
