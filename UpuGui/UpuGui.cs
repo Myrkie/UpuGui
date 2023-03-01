@@ -410,59 +410,57 @@ namespace UpuGui
                 // Iterate over each file in the remap info and create a tree node for it
                 foreach (var keyValuePair in _mRemapInfo)
                 {
-                    if (File.Exists(keyValuePair.Key))
+                    if (!File.Exists(keyValuePair.Key)) continue;
+                    var relativePath = keyValuePair.Value.Replace(_mTmpUnpackedOutputPathForUi, "");
+
+                    // Create a list of directory names in the relative path
+                    var directories = new List<string>(relativePath.Split(Path.DirectorySeparatorChar.ToString()));
+
+                    // Remove any empty directory names
+                    directories.RemoveAll(string.IsNullOrEmpty);
+
+                    // Remove the file name from the list of directories
+                    directories.RemoveAt(directories.Count - 1);
+
+                    // Initialize the parent node to null
+                    TreeNode? parentNode = null;
+
+                    // Traverse the list of directory names and create nodes for them
+                    foreach (var directory in directories)
                     {
-                        var relativePath = keyValuePair.Value.Replace(_mTmpUnpackedOutputPathForUi, "");
-
-                        // Create a list of directory names in the relative path
-                        var directories = new List<string>(relativePath.Split(Path.DirectorySeparatorChar.ToString()));
-
-                        // Remove any empty directory names
-                        directories.RemoveAll(string.IsNullOrEmpty);
-
-                        // Remove the file name from the list of directories
-                        directories.RemoveAt(directories.Count - 1);
-
-                        // Initialize the parent node to null
-                        TreeNode? parentNode = null;
-
-                        // Traverse the list of directory names and create nodes for them
-                        foreach (var directory in directories)
+                        // Check if the parent node already exists
+                        if (!directoryNodes.TryGetValue(directory, out var directoryNode))
                         {
-                            // Check if the parent node already exists
-                            if (!directoryNodes.TryGetValue(directory, out var directoryNode))
+                            // Create a new directory node and add it to the parent node
+                            directoryNode = new TreeNode(directory) { Checked = true};
+                            directoryNodes[directory] = directoryNode;
+                            if (parentNode == null)
                             {
-                                // Create a new directory node and add it to the parent node
-                                directoryNode = new TreeNode(directory) { Checked = true};
-                                directoryNodes[directory] = directoryNode;
-                                if (parentNode == null)
-                                {
-                                    treeNodes.Add(directoryNode);
-                                }
-                                else
-                                {
-                                    parentNode.Nodes.Add(directoryNode);
-                                }
+                                treeNodes.Add(directoryNode);
                             }
-
-                            // Set the current directory node as the parent for the next directory node
-                            parentNode = directoryNode;
+                            else
+                            {
+                                parentNode.Nodes.Add(directoryNode);
+                            }
                         }
-                        var text = keyValuePair.Value.Split('\\').Last();
+
+                        // Set the current directory node as the parent for the next directory node
+                        parentNode = directoryNode;
+                    }
+                    var text = keyValuePair.Value.Split('\\').Last();
                         
 
-                        // Create the file node and add it to the final parent node
-                        var fileNode = new TreeNode(relativePath) { Checked = true, Tag = keyValuePair, Text = text };
+                    // Create the file node and add it to the final parent node
+                    var fileNode = new TreeNode(relativePath) { Checked = true, Tag = keyValuePair, Text = text };
 
-                        // Add the final file node to its parent node, if it exists
-                        if (parentNode != null)
-                        {
-                            parentNode.Nodes.Add(fileNode);
-                        }
-                        else
-                        {
-                            treeNodes.Add(fileNode);
-                        }
+                    // Add the final file node to its parent node, if it exists
+                    if (parentNode != null)
+                    {
+                        parentNode.Nodes.Add(fileNode);
+                    }
+                    else
+                    {
+                        treeNodes.Add(fileNode);
                     }
                 }
 
