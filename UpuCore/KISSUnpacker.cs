@@ -36,8 +36,13 @@ namespace UpuGui.UpuCore
         }
 
 
+        /// <summary>
+        /// Returns a randomly generated file path in the user's temporary folder, with an "Upu" subdirectory.
+        /// </summary>
+        /// <returns>A string representing the full path to the file.</returns>
         public static string GetTempPath()
         {
+            // Combine the user's temporary folder path, "Upu" subdirectory, and a randomly generated file name to create the full path.
             return Path.Combine(Path.Combine(Path.GetTempPath(), "Upu"), Path.GetRandomFileName());
         }
 

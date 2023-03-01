@@ -66,7 +66,6 @@ namespace UpuGui
             _mUpu = upu;
             if (UpuConsole.UpuConsole.IsContextMenuHandlerRegistered())
                 _btnRegisterUnregister.Text = @"Unregister Explorer Context Menu Handler";
-            new KissUnpacker();
             var mShellHandlerCheckTimer = new Timer();
             mShellHandlerCheckTimer.Interval = 5000;
 #pragma warning disable CS8622
