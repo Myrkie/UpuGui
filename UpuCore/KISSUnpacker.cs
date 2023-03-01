@@ -9,132 +9,231 @@ namespace UpuGui.UpuCore
     // ReSharper disable once IdentifierTypo
     public class KissUnpacker
     {
-        internal static string tempPath;
-        private string GetDefaultOutputPathName(string? inputFilepath, string? outputPath = null!)
+        internal static string? TempPath;
+        /// <summary>
+        /// Generates default output path for the unpacked files.
+        /// </summary>
+        /// <param name="inputFilePath">The input file path.</param>
+        /// <param name="outputPath">The output path. If null, the parent directory of the input file is used.</param>
+        /// <returns>The default output path name.</returns>
+        private static string GetDefaultOutputPathName(string? inputFilePath, string? outputPath = null!)
         {
-            var fileInfo = new FileInfo(inputFilepath!);
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-            // ReSharper disable once ConvertIfStatementToNullCoalescingAssignment
-            if (outputPath == null)
-            {
-                outputPath = fileInfo.Directory!.FullName;
-            }
-            var output = Path.Combine(outputPath, fileInfo.Name + "_unpacked");
+            var inputFile = new FileInfo(inputFilePath!);
+            // If no output path is provided, use the parent directory of the input file
+            var defaultOutputPath = outputPath ?? inputFile.Directory!.FullName;
 
+            // Create the output path by combining the output directory and the input file name with "_unpacked" suffix
+            var output = Path.Combine(defaultOutputPath, inputFile.Name + "_unpacked");
+
+            // If the output directory already exists, delete it and create a new one with a different name
             if (!Directory.Exists(output)) return output;
-            Directory.Delete(output,true);
-            var path = Path.Combine(outputPath, fileInfo.Name + "_unpacked");
-            Directory.CreateDirectory(path);
-            output = path;
+            Directory.Delete(output, true);
+            var newPath = Path.Combine(defaultOutputPath, inputFile.Name + "_unpacked");
+            Directory.CreateDirectory(newPath);
+            output = newPath;
+
             return output;
         }
 
-        public string GetTempPath()
+
+        public static string GetTempPath()
         {
             return Path.Combine(Path.Combine(Path.GetTempPath(), "Upu"), Path.GetRandomFileName());
         }
 
-        public Dictionary<string, string> Unpack(string? inputFilepath, string? outputPath, string? tempdir)
+        /// <summary>
+        /// Unpacks a Unity package at the specified input file path to the specified output path.
+        /// </summary>
+        /// <param name="inputFilepath">The input file path.</param>
+        /// <param name="outputPath">The output path.</param>
+        /// <param name="tempdir">The temporary directory path. If not specified, a system-provided temporary directory will be used.</param>
+        /// <returns>A dictionary containing remap information for the extracted files.</returns>
+        public static Dictionary<string, string> Unpack(string? inputFilepath, string? outputPath, string? tempdir)
         {
+            // Print a message indicating that the package is being extracted
             Console.WriteLine($@"Extracting {inputFilepath} to {outputPath}");
+
+            // If the input file path doesn't exist, try to construct a path based on the current directory
             if (!File.Exists(inputFilepath))
             {
                 inputFilepath = Path.Combine(Environment.CurrentDirectory, inputFilepath!);
-                if (!File.Exists(inputFilepath))
-                    throw new FileNotFoundException(inputFilepath);
+                if (!File.Exists(inputFilepath)) throw new FileNotFoundException(inputFilepath);
             }
-            // ReSharper disable once StringLiteralTypo
+
+            // Check that the input file has a ".unitypackage" extension
             if (!inputFilepath.ToLower().EndsWith(".unitypackage"))
-                // ReSharper disable once StringLiteralTypo
                 throw new ArgumentException("File should have unitypackage extension");
+
+            // If the output directory doesn't exist, create it
             outputPath = GetDefaultOutputPathName(inputFilepath, outputPath);
-            if (!Directory.Exists(outputPath))
-                Directory.CreateDirectory(outputPath);
-            tempPath = tempdir ?? GetTempPath();
-            var str1 = Path.Combine(tempPath, "_UPU_TAR");
-            var tarFileName = DecompressGZip(new FileInfo(inputFilepath), str1);
-            var str2 = Path.Combine(tempPath, "content");
-            ExtractTar(tarFileName, str2);
-            Directory.Delete(str1, true);
-            return GenerateRemapInfo(str2, outputPath);
+            if (!Directory.Exists(outputPath)) Directory.CreateDirectory(outputPath);
+
+            // Determine the temporary directory path
+            TempPath = tempdir ?? GetTempPath();
+
+            // Create a path for the temporary tar file and decompress the input file to it
+            var tempTarPath = Path.Combine(TempPath, "_UPU_TAR");
+            var tarFilePath = DecompressGZip(new FileInfo(inputFilepath), tempTarPath);
+
+            // Create a path for the extracted content and extract the tar file to it
+            var extractedContentPath = Path.Combine(TempPath, "content");
+            ExtractTar(tarFilePath, extractedContentPath);
+
+            // Delete the temporary tar file
+            Directory.Delete(tempTarPath, true);
+
+            // Generate remap information for the extracted files and return it
+            return GenerateRemapInfo(extractedContentPath, outputPath);
         }
 
-        private Dictionary<string, string> GenerateRemapInfo(string extractedContentPath, string? remapPath)
+        /// <summary>
+        /// Generates remap information for the extracted files in the specified directory.
+        /// </summary>
+        /// <param name="extractedContentPath">The path to the directory containing the extracted files.</param>
+        /// <param name="remapPath">The path to the directory to which the files will be remapped.</param>
+        /// <returns>A dictionary containing remap information for the extracted files.</returns>
+        private static Dictionary<string, string> GenerateRemapInfo(string extractedContentPath, string? remapPath)
         {
-            var dictionary = new Dictionary<string, string>();
-            foreach (var directoryInfo in new DirectoryInfo(extractedContentPath).GetDirectories())
+            // Create an empty dictionary to hold the remap information
+            var remapInfo = new Dictionary<string, string>();
+
+            // Loop through each subdirectory in the extracted content directory
+            foreach (var directory in new DirectoryInfo(extractedContentPath).GetDirectories())
             {
-                var path2 = File.ReadAllLines(Path.Combine(directoryInfo.FullName, "pathname"))[0].Replace('/',
+                // Read the "pathname" file to get the path to the file within the Unity project
+                var path = File.ReadAllLines(Path.Combine(directory.FullName, "pathname"))[0].Replace('/',
                     Path.DirectorySeparatorChar);
-                var key = Path.Combine(directoryInfo.FullName, "asset");
-                var fileName = Path.Combine(remapPath!, path2);
-                dictionary.Add(key, fileName);
+
+                // Create paths for the asset and its remapped location, and add them to the dictionary
+                var assetPath = Path.Combine(directory.FullName, "asset");
+                var remappedPath = Path.Combine(remapPath!, path);
+                remapInfo.Add(assetPath, remappedPath);
             }
-            return dictionary;
+
+            // Return the dictionary containing the remap information
+            return remapInfo;
         }
 
-        public void RemapFiles(Dictionary<string, string> map)
+        public static void RemapFiles(Dictionary<string, string> map)
         {
-            foreach (var keyValuePair in map)
+            foreach (var (sourcePath, destinationPath) in map)
             {
-                var str = keyValuePair.Value;
-                var key = keyValuePair.Key;
-                var fileInfo = new FileInfo(keyValuePair.Value);
+                // Extract values from the dictionary
+
+                // Create a FileInfo object to get the directory path
+                var fileInfo = new FileInfo(destinationPath);
+
+                // Create the directory if it doesn't already exist
                 if (!Directory.Exists(fileInfo.DirectoryName))
                 {
-                    Console.WriteLine($@"Creating directory {str}...");
+                    Console.WriteLine($@"Creating directory {destinationPath}...");
                     Directory.CreateDirectory(fileInfo.DirectoryName!);
                 }
-                if (File.Exists(key))
+
+                // Check if the source file exists
+                if (!File.Exists(sourcePath))
                 {
-                    Console.WriteLine($@"Extracting file {str}...");
-                    if (File.Exists(str))
-                        File.Delete(str);
-                    File.Move(key, str);
+                    continue;
                 }
+
+                // Move the file to the destination
+                Console.WriteLine($@"Extracting file {destinationPath}...");
+                if (File.Exists(destinationPath))
+                {
+                    File.Delete(destinationPath);
+                }
+                File.Move(sourcePath, destinationPath);
             }
         }
 
-        private string DecompressGZip(FileInfo fileToDecompress, string outputPath)
+
+        /// <summary>
+        /// Decompresses a file with GZip compression and writes the decompressed data to a file.
+        /// </summary>
+        /// <param name="fileToDecompress">The file to decompress.</param>
+        /// <param name="outputDirectory">The directory in which to write the decompressed file.</param>
+        /// <returns>The path to the decompressed file.</returns>
+        private static string DecompressGZip(FileInfo fileToDecompress, string outputDirectory)
         {
-            using var fileStream1 = fileToDecompress.OpenRead();
-            var path2 = fileToDecompress.Name;
+            // Open the input file stream
+            using var inputFileStream = fileToDecompress.OpenRead();
+
+            // Get the name of the file to be decompressed
+            var fileName = fileToDecompress.Name;
             if (fileToDecompress.Extension.Length > 0)
-                path2 = path2.Remove(path2.Length - fileToDecompress.Extension.Length);
-            if (!Directory.Exists(outputPath))
-                Directory.CreateDirectory(outputPath);
-            var path = Path.Combine(outputPath, path2);
-            using var fileStream2 = File.Create(path);
-            using var gzipStream = new GZipStream(fileStream1, CompressionMode.Decompress);
-            CopyStream(gzipStream, fileStream2);
+                fileName = fileName.Remove(fileName.Length - fileToDecompress.Extension.Length);
+
+            // Create the output directory if it does not already exist
+            if (!Directory.Exists(outputDirectory))
+                Directory.CreateDirectory(outputDirectory);
+
+            // Create the output file path
+            var outputPath = Path.Combine(outputDirectory, fileName);
+
+            // Open the output file stream and create a GZip stream to decompress the input data
+            using var outputFileStream = File.Create(outputPath);
+            using var gzipStream = new GZipStream(inputFileStream, CompressionMode.Decompress);
+
+            // Copy the decompressed data to the output file stream
+            CopyStream(gzipStream, outputFileStream);
+
+            // Print a message indicating that the file has been decompressed
             Console.WriteLine(@"Decompressed: {0}", fileToDecompress.Name);
 
-            return path;
+            // Return the path to the decompressed file
+            return outputPath;
         }
 
-        private static void CopyStream(Stream input, Stream output)
+        /// <summary>
+        /// Copies data from one stream to another.
+        /// </summary>
+        /// <param name="source">The stream to copy from.</param>
+        /// <param name="destination">The stream to copy to.</param>
+        private static void CopyStream(Stream source, Stream destination)
         {
+            // Create a buffer to hold the data being copied.
             var buffer = new byte[32768];
-            int read;
-            while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
+
+            // Keep reading from the source stream and writing to the destination stream
+            // until there's no more data to be read.
+            int bytesRead;
+            while ((bytesRead = source.Read(buffer, 0, buffer.Length)) > 0)
             {
-                output.Write (buffer, 0, read);
+                // Write the data from the buffer to the destination stream.
+                destination.Write(buffer, 0, bytesRead);
             }
         }
 
-        // ReSharper disable once UnusedMethodReturnValue.Local
-        private bool ExtractTar(string tarFileName, string destFolder)
+
+        /// <summary>
+        /// Extracts a .tar file to the specified destination folder.
+        /// </summary>
+        /// <param name="tarFileName">The path to the .tar file to extract.</param>
+        /// <param name="destinationFolder">The path to the folder where the extracted files should be placed.</param>
+        /// <returns>True if extraction was successful, false otherwise.</returns>
+        private static void ExtractTar(string tarFileName, string destinationFolder)
         {
-            Console.WriteLine($@"Extracting {tarFileName} to {destFolder}...");
+            Console.WriteLine($@"Extracting {tarFileName} to {destinationFolder}...");
+    
+            // Store the current working directory so we can change it temporarily.
             var currentDirectory = Directory.GetCurrentDirectory();
+
+            // Open the .tar file as a stream.
             using (Stream tarredData = File.OpenRead(tarFileName))
             {
-                Directory.CreateDirectory(destFolder);
-                Directory.SetCurrentDirectory(destFolder);
+                // Create the destination folder if it doesn't exist.
+                Directory.CreateDirectory(destinationFolder);
+
+                // Change the current working directory to the destination folder.
+                Directory.SetCurrentDirectory(destinationFolder);
+
+                // Extract the .tar file to the current directory.
                 TarFile.ExtractToDirectory(tarredData, ".", true);
             }
+
+            // Reset the current working directory to its original value.
             Directory.SetCurrentDirectory(currentDirectory);
-            return true;
         }
+
     }
 }

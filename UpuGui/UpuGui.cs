@@ -29,7 +29,6 @@ namespace UpuGui
         private IContainer components;
 #pragma warning restore CS0649
         private GroupBox _groupBox;
-        private readonly KissUnpacker _mKu;
         private Dictionary<string, string> _mRemapInfo;
         private string? _mTmpUnpackedOutputPathForUi;
         private readonly List<string> _unpacks = new();
@@ -65,9 +64,9 @@ namespace UpuGui
         public UpuGui(UpuConsole.UpuConsole upu) : this()
         {
             _mUpu = upu;
-            if (upu.IsContextMenuHandlerRegistered())
+            if (UpuConsole.UpuConsole.IsContextMenuHandlerRegistered())
                 _btnRegisterUnregister.Text = @"Unregister Explorer Context Menu Handler";
-            _mKu = new KissUnpacker();
+            new KissUnpacker();
             var mShellHandlerCheckTimer = new Timer();
             mShellHandlerCheckTimer.Interval = 5000;
 #pragma warning disable CS8622
@@ -347,7 +346,7 @@ namespace UpuGui
 
         private void ShellHandlerCheckTimer_Tick(object sender, EventArgs e)
         {
-            _btnRegisterUnregister.Text = _mUpu.IsContextMenuHandlerRegistered() ? @"Unregister Explorer Context Menu Handler" : @"Register Explorer Context Menu Handler";
+            _btnRegisterUnregister.Text = UpuConsole.UpuConsole.IsContextMenuHandlerRegistered() ? @"Unregister Explorer Context Menu Handler" : @"Register Explorer Context Menu Handler";
             _btnRegisterUnregister.Enabled = true;
         }
 
@@ -396,9 +395,9 @@ namespace UpuGui
             try
             {
                 var treeNodes = new List<TreeNode>();
-                _mTmpUnpackedOutputPathForUi = _mKu.GetTempPath();
+                _mTmpUnpackedOutputPathForUi = KissUnpacker.GetTempPath();
                 _unpacks.Add(_mTmpUnpackedOutputPathForUi);
-                _mRemapInfo = _mKu.Unpack(e.Argument!.ToString(), _mTmpUnpackedOutputPathForUi, _mTmpUnpackedOutputPathForUi);
+                _mRemapInfo = KissUnpacker.Unpack(e.Argument!.ToString(), _mTmpUnpackedOutputPathForUi, _mTmpUnpackedOutputPathForUi);
 
                 // Create a dictionary to hold the parent nodes for each directory path
                 var directoryNodes = new Dictionary<string, TreeNode>();
@@ -501,9 +500,10 @@ namespace UpuGui
             foreach (var keyValuePair in dictionary)
                 map[keyValuePair.Key] = keyValuePair.Value.Replace(_mTmpUnpackedOutputPathForUi!,
                     _saveToFolderDialog.SelectedPath);
-            _mKu.RemapFiles(map);
+            KissUnpacker.RemapFiles(map);
         }
-       IEnumerable<TreeNode> Collect(TreeNodeCollection nodes)
+
+       static IEnumerable<TreeNode> Collect(TreeNodeCollection nodes)
         {
             foreach(TreeNode node in nodes)
             {
@@ -513,7 +513,7 @@ namespace UpuGui
                     yield return child;
             }
         }
-       private void treeViewContents_AfterSelect(object sender, TreeViewEventArgs e)
+       private static void treeViewContents_AfterSelect(object sender, TreeViewEventArgs e)
         {
             // Check if the selected node is a parent node
             if (e.Node.Nodes.Count > 0)
@@ -525,7 +525,7 @@ namespace UpuGui
                 }
             }
         }
-        private void treeViewContents_BeforeSelect(object sender, TreeViewCancelEventArgs e)
+        private static void treeViewContents_BeforeSelect(object sender, TreeViewCancelEventArgs e)
         {
             if (e.Node.Nodes.Contains(e.Node))
             {
@@ -582,7 +582,7 @@ namespace UpuGui
 
         private void btnRegisterUnregister_Click_1(object sender, EventArgs e)
         {
-            _mUpu.RegisterUnregisterShellHandler(!_mUpu.IsContextMenuHandlerRegistered());
+            _mUpu.RegisterUnregisterShellHandler(!UpuConsole.UpuConsole.IsContextMenuHandlerRegistered());
             _btnRegisterUnregister.Enabled = false;
         }
         private void btnExit_Click_1(object sender, EventArgs e)

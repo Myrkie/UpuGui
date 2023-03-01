@@ -113,7 +113,7 @@ namespace UpuGui.UpuConsole
             }
         }
 
-        private string GetUsage(OptionSet p)
+        private static string GetUsage(OptionSet p)
         {
             var stringBuilder = new StringBuilder();
             stringBuilder.AppendLine();
@@ -127,7 +127,7 @@ namespace UpuGui.UpuConsole
             return stringBuilder.ToString();
         }
 
-        private void RegisterShellHandler(string fileType, string shellKeyName, string menuText, string menuCommand)
+        private static void RegisterShellHandler(string fileType, string shellKeyName, string menuText, string menuCommand)
         {
             using (var subKey = Registry.ClassesRoot.CreateSubKey($"SystemFileAssociations\\{fileType}\\shell\\{shellKeyName}"))
             {
@@ -143,7 +143,7 @@ namespace UpuGui.UpuConsole
             }
         }
 
-        private void UnregisterShellHandler(string fileType, string shellKeyName)
+        private static void UnregisterShellHandler(string fileType, string shellKeyName)
         {
             if (string.IsNullOrEmpty($"SystemFileAssociations\\{fileType}") || string.IsNullOrEmpty(shellKeyName) ||
                 !IsContextMenuHandlerRegistered())
@@ -151,7 +151,7 @@ namespace UpuGui.UpuConsole
             Registry.ClassesRoot.DeleteSubKeyTree($"SystemFileAssociations\\{fileType}");
         }
 
-        public bool IsContextMenuHandlerRegistered()
+        public static bool IsContextMenuHandlerRegistered()
         {
             var registryKey = Registry.ClassesRoot.OpenSubKey("SystemFileAssociations\\.Unitypackage\\shell\\Unpack\\command");
             return (registryKey != null) && (registryKey.GetValue(null) != null);
@@ -161,8 +161,8 @@ namespace UpuGui.UpuConsole
         {
             try
             {
-                _mUnpacker.RemapFiles(_mUnpacker.Unpack(fileName, OutputPath, null));
-                Directory.Delete(KissUnpacker.tempPath, true);
+                KissUnpacker.RemapFiles(KissUnpacker.Unpack(fileName, OutputPath, null));
+                if (KissUnpacker.TempPath != null) Directory.Delete(KissUnpacker.TempPath, true);
             }
             catch (Exception ex)
             {
