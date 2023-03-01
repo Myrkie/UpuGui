@@ -36,7 +36,7 @@ namespace UpuGui
                     Console.WriteLine(ex);
                 }
                 FreeConsole();
-                if (!string.Join(" ", Environment.GetCommandLineArgs()).Contains("--elevated")) SendKeys.SendWait("{ENTER}");
+                if (!string.Join(" ", Environment.GetCommandLineArgs()).Contains("--elevated")) { SendKeys.SendWait("{ENTER}"); }
                 Environment.Exit(exitCode);
             }
             else
