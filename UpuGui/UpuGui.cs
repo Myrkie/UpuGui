@@ -340,7 +340,10 @@ namespace UpuGui
             var strArray = (string[]) e.Data!.GetData(DataFormats.FileDrop)!;
             if (strArray.Length <= 0)
                 return;
-            OpenFile(strArray[0]);
+            var outfile = strArray[0];
+            _openFileDialog.FileName = outfile;
+
+            OpenFile(outfile);
         }
 
         private void ShellHandlerCheckTimer_Tick(object sender, EventArgs e)
@@ -349,18 +352,23 @@ namespace UpuGui
             _btnRegisterUnregister.Enabled = true;
         }
 
-        private void OpenFile(string filePathName)
+        private static string? _previousfile;
+
+        private void OpenFile(string? filePathName)
         {
+            // checks if the file was previous loaded to avoid repeated decompression
+            if (filePathName == _previousfile) return;
+            _previousfile = filePathName;
             _groupBox.Text = new FileInfo(filePathName).Name;
             _btnExit.Enabled = false;
             _btnSelectInputFile.Enabled = false;
             _progressBar.Visible = true;
-            _treeViewContents.Nodes.Clear();
             var backgroundWorker = new BackgroundWorker();
 #pragma warning disable CS8622
             backgroundWorker.DoWork += ReadInputFileWorker;
             backgroundWorker.RunWorkerCompleted += ReadInputFileWorkerCompleted;
 #pragma warning restore CS8622
+            _treeViewContents.Nodes.Clear();
             backgroundWorker.RunWorkerAsync(filePathName);
         }
 
@@ -550,8 +558,8 @@ namespace UpuGui
         private void btnSelectInputFile_Click_1(object sender, EventArgs e)
         {
             // ReSharper disable once StringLiteralTypo
-            _openFileDialog.Filter = @"Unitypackage Files|*.unitypackage";
-            var num = (int)_openFileDialog.ShowDialog();
+            _openFileDialog.Filter = @"Unitypackage Files|*.unitypackage"; 
+            _openFileDialog.ShowDialog();
             if (string.IsNullOrEmpty(_openFileDialog.FileName))
                 return;
             OpenFile(_openFileDialog.FileName);
@@ -562,7 +570,7 @@ namespace UpuGui
             // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
             if (_mRemapInfo == null)
                 return;
-            var num = (int)_saveToFolderDialog.ShowDialog();
+            _saveToFolderDialog.ShowDialog();
             if (string.IsNullOrEmpty(_saveToFolderDialog.SelectedPath))
                 return;
             _btnAbout.Enabled = false;
