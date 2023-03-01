@@ -38,10 +38,6 @@ namespace UpuGui.UpuConsole
             
             p.Add("h|help", "Show help", _ => Console.WriteLine(GetUsage(p)));
             p.Parse(Environment.GetCommandLineArgs());
-            if (string.IsNullOrEmpty(InputFile) && !Register && !Unregister)
-            {
-                Console.WriteLine(GetUsage(p));
-            }
             if (!string.IsNullOrEmpty(InputFile) && !File.Exists(InputFile))
             {
                 Console.WriteLine(@"File not found: " + InputFile);
