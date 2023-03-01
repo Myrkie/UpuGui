@@ -106,18 +106,20 @@ namespace UpuGui.UpuCore
             var path = Path.Combine(outputPath, path2);
             using var fileStream2 = File.Create(path);
             using var gzipStream = new GZipStream(fileStream1, CompressionMode.Decompress);
-            CopyStreamDotNet20(gzipStream, fileStream2);
+            CopyStream(gzipStream, fileStream2);
             Console.WriteLine(@"Decompressed: {0}", fileToDecompress.Name);
 
             return path;
         }
 
-        private void CopyStreamDotNet20(Stream input, Stream output)
+        private static void CopyStream(Stream input, Stream output)
         {
             var buffer = new byte[32768];
-            int count;
-            while ((count = input.Read(buffer, 0, buffer.Length)) > 0)
-                output.Write(buffer, 0, count);
+            int read;
+            while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                output.Write (buffer, 0, read);
+            }
         }
 
         // ReSharper disable once UnusedMethodReturnValue.Local
