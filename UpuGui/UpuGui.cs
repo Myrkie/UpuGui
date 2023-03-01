@@ -167,7 +167,7 @@ namespace UpuGui
             _btnCollapse.TextAlign = ContentAlignment.MiddleRight;
             _btnCollapse.UseVisualStyleBackColor = true;
 #pragma warning disable CS8622
-            _btnCollapse.Click += BtnCollapse_Click_1;
+            _btnCollapse.Click += _btnCollapse_Click_1;
 #pragma warning restore CS8622
             // 
             // _chkBoxSelectAll
@@ -213,7 +213,7 @@ namespace UpuGui
             _btnAbout.Text = @"About";
             _btnAbout.UseVisualStyleBackColor = true;
 #pragma warning disable CS8622
-            _btnAbout.Click += btnAbout_Click_1;
+            _btnAbout.Click += _btnAbout_Click_1;
 #pragma warning restore CS8622
             // 
             // _btnSelectInputFile
@@ -275,7 +275,7 @@ namespace UpuGui
             _btnExit.Text = @"Exit";
             _btnExit.UseVisualStyleBackColor = true;
 #pragma warning disable CS8622
-            _btnExit.Click += btnExit_Click_1;
+            _btnExit.Click += _btnExit_Click_1;
 #pragma warning restore CS8622
             // 
             // _statusStrip1
@@ -328,7 +328,7 @@ namespace UpuGui
         }
         
         
-        private void Form1_DragEnter(object sender, DragEventArgs e)
+        private static void Form1_DragEnter(object sender, DragEventArgs e)
         {
             if (!e.Data!.GetDataPresent(DataFormats.FileDrop))
                 return;
@@ -368,10 +368,8 @@ namespace UpuGui
         {
             if (e.Result is Exception)
             {
-                var num =
-                    (int)
-                    // ReSharper disable once StringLiteralTypo
-                    MessageBox.Show(@"An exception happened: \n" + e.Result, @"Ooops...", MessageBoxButtons.OK,
+                // ReSharper disable once StringLiteralTypo
+                MessageBox.Show(@"An exception happened: \n" + e.Result, @"Ooops...", MessageBoxButtons.OK,
                         MessageBoxIcon.Hand);
             }
             else
@@ -536,6 +534,7 @@ namespace UpuGui
         {
             foreach (var unpack in _unpacks)
             {
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
                 if (unpack == null || !Directory.Exists(unpack))
                     return;
                 Directory.Delete(unpack, true);
@@ -584,11 +583,11 @@ namespace UpuGui
             _mUpu.RegisterUnregisterShellHandler(!UpuConsole.UpuConsole.IsContextMenuHandlerRegistered());
             _btnRegisterUnregister.Enabled = false;
         }
-        private void btnExit_Click_1(object sender, EventArgs e)
+        private static void _btnExit_Click_1(object sender, EventArgs e)
         {
             Application.Exit();
         }
-        private void btnAbout_Click_1(object sender, EventArgs e)
+        private static void _btnAbout_Click_1(object sender, EventArgs e)
         {
             Process.Start("cmd","/c start https://github.com/Myrkie/UpuGui");
         }
@@ -607,7 +606,7 @@ namespace UpuGui
             _exportmeta = _chkBoxMeta.Checked;
         }
         
-        private void BtnCollapse_Click_1(object sender, EventArgs e)
+        private void _btnCollapse_Click_1(object sender, EventArgs e)
         {
             foreach (var node in Collect(_treeViewContents.Nodes))
             {
@@ -630,7 +629,7 @@ namespace UpuGui
                 }
             }
         }
-        private void CheckNode(TreeNode node, bool isChecked)
+        private static void CheckNode(TreeNode node, bool isChecked)
         {
             node.Checked = isChecked;
             foreach (TreeNode childNode in node.Nodes)
