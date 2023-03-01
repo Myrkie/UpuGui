@@ -13,9 +13,9 @@
         <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
         <_SuppressWinFormsTrimError>true</_SuppressWinFormsTrimError>
         <ApplicationIcon>Icons\Icon.ico</ApplicationIcon>
-        <AssemblyVersion>1.6.0.0</AssemblyVersion>
-        <FileVersion>1.6.0.0</FileVersion>
-        <ProductVersion>1.6.0.0</ProductVersion>
+        <AssemblyVersion>1.6.1.0</AssemblyVersion>
+        <FileVersion>1.6.1.0</FileVersion>
+        <ProductVersion>1.6.1.0</ProductVersion>
         <Authors>Myrkur</Authors>
         <Copyright>Myrkur/Myrkie</Copyright>
         <IsPackable>false</IsPackable>
