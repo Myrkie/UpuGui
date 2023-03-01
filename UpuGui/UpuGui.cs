@@ -14,6 +14,8 @@ namespace UpuGui
 {
     public sealed class UpuGui : Form
     {
+        // ReSharper disable once IdentifierTypo
+        private static bool _exportmeta;
         private Button _btnExit;
         private Button _btnRegisterUnregister;
         private Button _btnSelectInputFile;
@@ -22,6 +24,7 @@ namespace UpuGui
         private Button _btnExpand;
         private Button _btnCollapse;
         private CheckBox _chkBoxSelectAll;
+        private CheckBox _chkBoxMeta;
 #pragma warning disable CS0649
         private IContainer components;
 #pragma warning restore CS0649
@@ -86,6 +89,7 @@ namespace UpuGui
             _btnExpand = new Button();
             _btnCollapse = new Button();
             _chkBoxSelectAll = new CheckBox();
+            _chkBoxMeta = new CheckBox();
             _treeViewContents = new TreeView();
             _openFileDialog = new OpenFileDialog();
             _btnExit = new Button();
@@ -246,6 +250,20 @@ namespace UpuGui
             _btnUnpack.Click += btnUnpack_Click_1;
 #pragma warning restore CS8622
             // 
+            // _chkBoxMeta
+            // 
+            _chkBoxMeta.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            _chkBoxMeta.Location = new Point(406, 429);
+            _chkBoxMeta.Margin = new Padding(4);
+            _chkBoxMeta.Name = "_chkBoxMeta";
+            _chkBoxMeta.Size = new Size(89, 38);
+            _chkBoxMeta.TabIndex = 10;
+            _chkBoxMeta.Text = @"ExportMeta";
+            _chkBoxMeta.UseVisualStyleBackColor = true;
+#pragma warning disable CS8622
+            _chkBoxMeta.CheckedChanged += _chkBoxMeta_CheckedChanged;
+#pragma warning restore CS8622
+            // 
             // _btnExit
             // 
             _btnExit.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
@@ -255,7 +273,7 @@ namespace UpuGui
             _btnExit.Margin = new Padding(4, 4, 4, 4);
             _btnExit.Name = "_btnExit";
             _btnExit.Size = new Size(149, 38);
-            _btnExit.TabIndex = 10;
+            _btnExit.TabIndex = 11;
             _btnExit.Text = @"Exit";
             _btnExit.UseVisualStyleBackColor = true;
 #pragma warning disable CS8622
@@ -268,7 +286,7 @@ namespace UpuGui
             _statusStrip1.Name = "_statusStrip1";
             _statusStrip1.Padding = new Padding(1, 0, 16, 0);
             _statusStrip1.Size = new Size(666, 22);
-            _statusStrip1.TabIndex = 11;
+            _statusStrip1.TabIndex = 12;
             _statusStrip1.Text = @"statusStrip1";
             // 
             // _progressBar
@@ -282,7 +300,7 @@ namespace UpuGui
             _progressBar.Name = "_progressBar";
             _progressBar.Size = new Size(631, 16);
             _progressBar.Style = ProgressBarStyle.Marquee;
-            _progressBar.TabIndex = 12;
+            _progressBar.TabIndex = 13;
             // 
             // UpuGui
             // 
@@ -294,6 +312,7 @@ namespace UpuGui
             Controls.Add(_progressBar);
             Controls.Add(_statusStrip1);
             Controls.Add(_btnExit);
+            Controls.Add(_chkBoxMeta);
             Controls.Add(_groupBox);
             Controls.Add(_btnSelectInputFile);
             Controls.Add(_btnUnpack);
@@ -472,9 +491,12 @@ namespace UpuGui
             foreach (var treeNode in Collect(_treeViewContents.Nodes))
             {
                 if(treeNode.Tag == null) continue;
-                if (treeNode.Checked)
-                    dictionary.Add(((KeyValuePair<string, string>)treeNode.Tag).Key,
-                        ((KeyValuePair<string, string>)treeNode.Tag).Value);
+                if (!treeNode.Checked) continue;
+                dictionary.Add(((KeyValuePair<string, string>)treeNode.Tag).Key, ((KeyValuePair<string, string>)treeNode.Tag).Value);
+                if (_exportmeta)
+                {
+                    dictionary.Add(((KeyValuePair<string, string>)treeNode.Tag).Key + ".meta", ((KeyValuePair<string, string>)treeNode.Tag).Value + ".meta");
+                }
             }
             foreach (var keyValuePair in dictionary)
                 map[keyValuePair.Key] = keyValuePair.Value.Replace(_mTmpUnpackedOutputPathForUi!,
@@ -577,6 +599,12 @@ namespace UpuGui
             {
                 node.ExpandAll();
             }
+        }
+        
+                
+        private void _chkBoxMeta_CheckedChanged(object sender, EventArgs e)
+        {
+            _exportmeta = _chkBoxMeta.Checked;
         }
         
         private void BtnCollapse_Click_1(object sender, EventArgs e)
