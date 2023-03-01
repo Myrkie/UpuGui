@@ -74,7 +74,7 @@ namespace UpuGui.UpuConsole
             {
                 UseShellExecute = true,
                 WorkingDirectory = Environment.CurrentDirectory,
-                FileName = Process.GetCurrentProcess().MainModule!.FileName,
+                FileName = Environment.ProcessPath,
                 Arguments = str + " " + _mAdditionalCommandLineArgs + " --elevated",
                 Verb = "runas"
             };
@@ -96,7 +96,7 @@ namespace UpuGui.UpuConsole
             {
                 if (register)
                     RegisterShellHandler(".UnityPackage", "unpack", "Unpack here",
-                        $"\"{Process.GetCurrentProcess().MainModule!.FileName}\" \"--input=%L\"");
+                        $"\"{Environment.ProcessPath}\" \"--input=%L\"");
                 else
                     UnregisterShellHandler(".UnityPackage", "unpack");
             }
