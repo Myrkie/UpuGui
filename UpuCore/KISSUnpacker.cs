@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Formats.Tar;
 using System.IO;
 using System.IO.Compression;
-using UpuGui.tar_cs;
 
 namespace UpuGui.UpuCore
 {
@@ -129,7 +129,7 @@ namespace UpuGui.UpuCore
             {
                 Directory.CreateDirectory(destFolder);
                 Directory.SetCurrentDirectory(destFolder);
-                new TarReader(tarredData).ReadToEnd(".");
+                TarFile.ExtractToDirectory(tarredData, ".", true);
             }
             Directory.SetCurrentDirectory(currentDirectory);
             return true;
