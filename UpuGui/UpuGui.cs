@@ -97,9 +97,10 @@ namespace UpuGui
             // 
             // _groupBox
             // 
-            _groupBox.Anchor = ((AnchorStyles.Top | AnchorStyles.Bottom) 
-                               | AnchorStyles.Left) 
-                              | AnchorStyles.Right;
+            _groupBox.Anchor = AnchorStyles.Top | 
+                               AnchorStyles.Bottom | 
+                               AnchorStyles.Left | 
+                               AnchorStyles.Right;
             _groupBox.Controls.Add(_btnExpand);
             _groupBox.Controls.Add(_btnCollapse);
             _groupBox.Controls.Add(_treeViewContents);
@@ -180,7 +181,7 @@ namespace UpuGui
             _chkBoxSelectAll.Text = @"Select All";
             _chkBoxSelectAll.UseVisualStyleBackColor = true;
 #pragma warning disable CS8622
-            _chkBoxSelectAll.CheckedChanged += checkBox1_CheckedChanged;
+            _chkBoxSelectAll.CheckedChanged += _chkBoxSelectAll_CheckedChanged;
 #pragma warning restore CS8622
             // 
             // _btnRegisterUnregister
@@ -272,8 +273,9 @@ namespace UpuGui
             // 
             // _progressBar
             // 
-            _progressBar.Anchor = (AnchorStyles.Bottom | AnchorStyles.Left) 
-                                 | AnchorStyles.Right;
+            _progressBar.Anchor = AnchorStyles.Bottom |
+                                   AnchorStyles.Left |
+                                   AnchorStyles.Right;
             _progressBar.Location = new Point(14, 472);
             _progressBar.Margin = new Padding(4, 4, 4, 4);
             _progressBar.MarqueeAnimationSpeed = 200;
@@ -584,7 +586,7 @@ namespace UpuGui
                 node.Collapse();
             }
         }
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        private void _chkBoxSelectAll_CheckedChanged(object sender, EventArgs e)
         {
             if(_chkBoxSelectAll.Checked){
                 foreach (TreeNode node in _treeViewContents.Nodes)
