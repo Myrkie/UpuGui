@@ -599,6 +599,7 @@ namespace UpuGui
             {
                 node.ExpandAll();
             }
+            _treeViewContents.Nodes[0].EnsureVisible();
         }
         
                 
