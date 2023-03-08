@@ -18,7 +18,7 @@
         <Authors>Myrkur</Authors>
         <Copyright>Myrkur/Myrkie</Copyright>
         <IsPackable>false</IsPackable>
-        <ApplicationIcon>Icons\icons8-archive-folder-16.ico</ApplicationIcon>
+        <ApplicationIcon>Icons\70px\icons8-archive-folder-70.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
