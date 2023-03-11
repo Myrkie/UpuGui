@@ -6,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Windows.Forms;
 using UpuGui.UpuCore;
 
@@ -38,6 +39,7 @@ namespace UpuGui
         private FolderBrowserDialog _saveToFolderDialog;
         private StatusStrip _statusStrip1;
         private TreeView _treeViewContents;
+        private RichTextBox _ConsoleTextBox;
 
         private UpuGui()
         {
@@ -94,6 +96,8 @@ namespace UpuGui
             _statusStrip1 = new StatusStrip();
             _progressBar = new ProgressBar();
             _btnRegisterUnregister = new Button();
+            _ConsoleTextBox = new RichTextBox();
+            Console.SetOut(new ControlWriter(_ConsoleTextBox));
             _groupBox.SuspendLayout();
             SuspendLayout();
             // 
@@ -107,6 +111,7 @@ namespace UpuGui
             _groupBox.Controls.Add(_btnCollapse);
             _groupBox.Controls.Add(_treeViewContents);
             _groupBox.Controls.Add(_chkBoxSelectAll);
+            _groupBox.Controls.Add(_ConsoleTextBox);
             _groupBox.Location = new Point(14, 14);
             _groupBox.Margin = new Padding(4, 4, 4, 4);
             _groupBox.Name = "_groupBox";
@@ -126,14 +131,31 @@ namespace UpuGui
             _treeViewContents.CheckBoxes = true;
             _treeViewContents.HotTracking = true;
             _treeViewContents.Location = new Point(7, 22);
-            _treeViewContents.Margin = new Padding(4, 4, 4, 4);
+            _treeViewContents.Margin = new Padding(4);
             _treeViewContents.Name = "_treeViewContents";
-            _treeViewContents.Size = new Size(624, 312);
+            _treeViewContents.Size = new Size(312, 312);
             _treeViewContents.TabIndex = 2;
 #pragma warning disable CS8622
             _treeViewContents.AfterSelect += treeViewContents_AfterCheck;
             _treeViewContents.AfterCheck += treeViewContents_AfterCheck;
             _treeViewContents.BeforeSelect += treeViewContents_BeforeSelect;
+#pragma warning restore CS8622
+            // 
+            // _ConsoleTextBox
+            // 
+            _ConsoleTextBox.Anchor = AnchorStyles.Top | 
+                                     AnchorStyles.Bottom |
+                                     AnchorStyles.Right;
+            _ConsoleTextBox.Location = new Point(326, 22);
+            _ConsoleTextBox.Margin = new Padding(4);
+            _ConsoleTextBox.Name = "_ConsoleTextBox";
+            _ConsoleTextBox.Size = new Size(312, 312);
+            _ConsoleTextBox.ReadOnly = true;
+            _ConsoleTextBox.AllowDrop = false;
+            _ConsoleTextBox.TabIndex = 8;
+            _ConsoleTextBox.Text = "";
+#pragma warning disable CS8622
+            _ConsoleTextBox.TextChanged += _ConsoleTextBox_TextChanged;
 #pragma warning restore CS8622
             // 
             // _btnExpand
@@ -584,6 +606,12 @@ namespace UpuGui
             backgroundWorker.RunWorkerAsync();
         }
 
+        private void _ConsoleTextBox_TextChanged(object sender, EventArgs e)
+        {
+            _ConsoleTextBox.SelectionStart = _ConsoleTextBox.Text.Length;
+            _ConsoleTextBox.ScrollToCaret();
+        }
+
         private void btnRegisterUnregister_Click_1(object sender, EventArgs e)
         {
             _mUpu.RegisterUnregisterShellHandler(!UpuConsole.UpuConsole.IsContextMenuHandlerRegistered());
@@ -648,6 +676,30 @@ namespace UpuGui
             if (disposing && components != null!)
                 components.Dispose();
             base.Dispose(disposing);
+        }
+    }
+    
+    public class ControlWriter : TextWriter
+    {
+        private Control textbox;
+        public ControlWriter(Control textbox)
+        {
+            this.textbox = textbox;
+        }
+
+        public override void Write(char value)
+        {
+            textbox.Text += value;
+        }
+
+        public override void Write(string value)
+        {
+            textbox.Text += value;
+        }
+
+        public override Encoding Encoding
+        {
+            get { return Encoding.ASCII; }
         }
     }
 }
