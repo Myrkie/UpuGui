@@ -14,6 +14,10 @@ Published under Creative Common 3.0 Attribution License [creativecommons-3.0](ht
 In-Application Icons
 By [Icons8](https://icons8.com)
 
+NodeTree Icons
+By [Unity Technologies](https://unity.com/)
+Extracted from the internal unity editor under the free and personal non commercial license
+
 ##  Options.cs ##
 
 ###### CopyRight ######

@@ -39,6 +39,7 @@ namespace UpuGui
         private FolderBrowserDialog _saveToFolderDialog;
         private StatusStrip _statusStrip1;
         private TreeView _treeViewContents;
+        private ImageList imageList;
         private RichTextBox _ConsoleTextBox;
 
         private UpuGui()
@@ -80,6 +81,7 @@ namespace UpuGui
 
         private void InitializeComponent()
         {
+            components = new Container();
             ComponentResourceManager resources = new ComponentResourceManager(typeof(UpuGui));
             _saveToFolderDialog = new FolderBrowserDialog();
             _btnAbout = new Button();
@@ -97,9 +99,31 @@ namespace UpuGui
             _progressBar = new ProgressBar();
             _btnRegisterUnregister = new Button();
             _ConsoleTextBox = new RichTextBox();
+            imageList = new ImageList(components);
             Console.SetOut(new ControlWriter(_ConsoleTextBox));
             _groupBox.SuspendLayout();
             SuspendLayout();
+            // 
+            // imageList
+            // 
+            imageList.ImageStream = (ImageListStreamer)resources.GetObject("imageList.ImageStream");
+            imageList.TransparentColor = Color.Transparent;
+            imageList.Images.SetKeyName(0, "d_AnimationClip Icon.png");
+            imageList.Images.SetKeyName(1, "d_Assembly Icon.png");
+            imageList.Images.SetKeyName(2, "d_cs Script Icon.png");
+            imageList.Images.SetKeyName(3, "d_Folder Icon.png");
+            imageList.Images.SetKeyName(4, "d_Image Icon.png");
+            imageList.Images.SetKeyName(5, "d_Material Icon.png");
+            imageList.Images.SetKeyName(6, "d_PrefabModel Icon.png");
+            imageList.Images.SetKeyName(7, "d_ScriptableObject Icon.png");
+            imageList.Images.SetKeyName(8, "d_Shader Icon.png");
+            imageList.Images.SetKeyName(9, "d_TextAsset Icon.png");
+            imageList.Images.SetKeyName(10, "d__Help.png");
+            imageList.Images.SetKeyName(11, "d_AnimatorController Icon.png");
+            imageList.Images.SetKeyName(12, "d_AvatarMask Icon.png");
+            imageList.Images.SetKeyName(13, "d_Mesh Icon.png");
+            imageList.Images.SetKeyName(14, "d_SceneAsset Icon.png");
+            imageList.Images.SetKeyName(15, "d_AudioSource Icon.png");
             // 
             // _groupBox
             // 
@@ -135,6 +159,7 @@ namespace UpuGui
             _treeViewContents.Name = "_treeViewContents";
             _treeViewContents.Size = new Size(312, 312);
             _treeViewContents.TabIndex = 2;
+            _treeViewContents.ImageList = imageList;
 #pragma warning disable CS8622
             _treeViewContents.AfterSelect += treeViewContents_AfterCheck;
             _treeViewContents.AfterCheck += treeViewContents_AfterCheck;
@@ -469,11 +494,164 @@ namespace UpuGui
                         // Set the current directory node as the parent for the next directory node
                         parentNode = directoryNode;
                     }
+
                     var text = keyValuePair.Value.Split('\\').Last();
-                        
+                    var extension = text.Split('.').Last();
+                    Console.WriteLine($"Image extension result: {extension}");
 
                     // Create the file node and add it to the final parent node
                     var fileNode = new TreeNode(relativePath) { Checked = true, Tag = keyValuePair, Text = text };
+                    switch (extension)
+                    {
+                        case "anim":
+                            fileNode.ImageIndex = 0;
+                            fileNode.SelectedImageIndex = 0;
+                            break;
+                        case "dll":
+                            fileNode.ImageIndex = 1;
+                            fileNode.SelectedImageIndex = 1;
+                            break;
+                        case "cs":
+                            fileNode.ImageIndex = 2;
+                            fileNode.SelectedImageIndex = 2;
+                            break;
+                        case "prefab":
+                            fileNode.ImageIndex = 6;
+                            fileNode.SelectedImageIndex = 6;
+                            break;
+                        case "mat":
+                            fileNode.ImageIndex = 5;
+                            fileNode.SelectedImageIndex = 5;
+                            break;
+                        case "png":
+                            fileNode.ImageIndex = 4;
+                            fileNode.SelectedImageIndex = 4;
+                            break;
+                        case "psd":
+                            fileNode.ImageIndex = 4;
+                            fileNode.SelectedImageIndex = 4;
+                            break;
+                        case "bmp":
+                            fileNode.ImageIndex = 4;
+                            fileNode.SelectedImageIndex = 4;
+                            break;
+                        case "exr":
+                            fileNode.ImageIndex = 4;
+                            fileNode.SelectedImageIndex = 4;
+                            break;
+                        case "gif":
+                            fileNode.ImageIndex = 4;
+                            fileNode.SelectedImageIndex = 4;
+                            break;
+                        case "hdr":
+                            fileNode.ImageIndex = 4;
+                            fileNode.SelectedImageIndex = 4;
+                            break;
+                        case "iff":
+                            fileNode.ImageIndex = 4;
+                            fileNode.SelectedImageIndex = 4;
+                            break;
+                        case "pict":
+                            fileNode.ImageIndex = 4;
+                            fileNode.SelectedImageIndex = 4;
+                            break;
+                        case "tga":
+                            fileNode.ImageIndex = 4;
+                            fileNode.SelectedImageIndex = 4;
+                            break;
+                        case "tiff":
+                            fileNode.ImageIndex = 4;
+                            fileNode.SelectedImageIndex = 4;
+                            break;
+                        case "jpg":
+                            fileNode.ImageIndex = 4;
+                            fileNode.SelectedImageIndex = 4;
+                            break;
+                        case "shader":
+                            fileNode.ImageIndex = 8;
+                            fileNode.SelectedImageIndex = 8;
+                            break;
+                        case "asset":
+                            fileNode.ImageIndex = 9;
+                            fileNode.SelectedImageIndex = 9;
+                            break;
+                        case "controller":
+                            fileNode.ImageIndex = 11;
+                            fileNode.SelectedImageIndex = 11;
+                            break;
+                        case "mask":
+                            fileNode.ImageIndex = 12;
+                            fileNode.SelectedImageIndex = 12;
+                            break;
+                        case "fbx":
+                            fileNode.ImageIndex = 13;
+                            fileNode.SelectedImageIndex = 13;
+                            break;
+                        case "dae":
+                            fileNode.ImageIndex = 13;
+                            fileNode.SelectedImageIndex = 13;
+                            break;
+                        case "3ds":
+                            fileNode.ImageIndex = 13;
+                            fileNode.SelectedImageIndex = 13;
+                            break;
+                        case "skp":
+                            fileNode.ImageIndex = 13;
+                            fileNode.SelectedImageIndex = 13;
+                            break;
+                        case "blend":
+                            fileNode.ImageIndex = 13;
+                            fileNode.SelectedImageIndex = 13;
+                            break;
+                        case "obj":
+                            fileNode.ImageIndex = 13;
+                            fileNode.SelectedImageIndex = 13;
+                            break;
+                        case "unity":
+                            fileNode.ImageIndex = 14;
+                            fileNode.SelectedImageIndex = 14;
+                            break;
+                        case "mp3":
+                            fileNode.ImageIndex = 15;
+                            fileNode.SelectedImageIndex = 15;
+                            break;
+                        case "off":
+                            fileNode.ImageIndex = 15;
+                            fileNode.SelectedImageIndex = 15;
+                            break;
+                        case "wav":
+                            fileNode.ImageIndex = 15;
+                            fileNode.SelectedImageIndex = 15;
+                            break;
+                        case "aiff":
+                            fileNode.ImageIndex = 15;
+                            fileNode.SelectedImageIndex = 15;
+                            break;
+                        case "aif":
+                            fileNode.ImageIndex = 15;
+                            fileNode.SelectedImageIndex = 15;
+                            break;
+                        case "mod":
+                            fileNode.ImageIndex = 15;
+                            fileNode.SelectedImageIndex = 15;
+                            break;
+                        case "it":
+                            fileNode.ImageIndex = 15;
+                            fileNode.SelectedImageIndex = 15;
+                            break;
+                        case "s3m":
+                            fileNode.ImageIndex = 15;
+                            fileNode.SelectedImageIndex = 15;
+                            break;
+                        case "xm":
+                            fileNode.ImageIndex = 15;
+                            fileNode.SelectedImageIndex = 15;
+                            break;
+                        default:
+                            fileNode.ImageIndex = 10;
+                            fileNode.SelectedImageIndex = 10;
+                            break;
+                    }
 
                     // Add the final file node to its parent node, if it exists
                     if (parentNode != null)
