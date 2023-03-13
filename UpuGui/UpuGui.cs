@@ -441,7 +441,7 @@ namespace UpuGui
             _btnExit.Enabled = true;
         }
         // iterate for the next person as a warning to not change what isn't broken
-        // time wasted on this method 4 hours
+        // time wasted on this method 5.4 hours
         private void ReadInputFileWorker(object sender, DoWorkEventArgs e)
         {
             try
