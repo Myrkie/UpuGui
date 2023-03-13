@@ -40,3 +40,17 @@ Latest Version: https://github.com/Myrkie/UpuGui/releases
 
 Search Engine Keywords:
 unity3d, unitypackage, unpack, extract, deflate, assets, UPUGui
+
+
+## Build Instructions ##
+Windows Only
+
+Release
+```text
+dotnet publish -c Release -o publish -p:PublishReadyToRun=true -p:PublishSingleFile=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=None -p:DebugSymbols=false
+```
+
+Debug
+```text
+dotnet publish -c Debug -o publish -p:PublishReadyToRun=true -p:PublishSingleFile=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=Full -p:DebugSymbols=true
+```
