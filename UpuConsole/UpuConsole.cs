@@ -233,9 +233,11 @@ namespace UpuGui.UpuConsole
             }
             catch (Exception ex)
             {
-                Console.WriteLine(@"==========================================");
-                Console.WriteLine(ex);
-                Console.WriteLine(@"==========================================");
+                var stringbuilder = new StringBuilder();
+                stringbuilder.Append(@"==========================================");
+                stringbuilder.Append(ex);
+                stringbuilder.Append(@"==========================================");
+                Console.WriteLine(stringbuilder.ToString());
                 if (!Environment.UserInteractive)
                     return;
                 Console.WriteLine(@"An error occured (see above)!");

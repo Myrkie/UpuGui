@@ -7,7 +7,7 @@ using System.IO.Compression;
 namespace UpuGui.UpuCore
 {
     // ReSharper disable once IdentifierTypo
-    public class KissUnpacker
+    public static class KissUnpacker
     {
         internal static string? TempPath;
         /// <summary>

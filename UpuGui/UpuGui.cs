@@ -52,10 +52,11 @@ namespace UpuGui
             _btnCollapse!.Enabled = false;
             _progressBar!.Visible = false;
             _treeViewContents!.CheckBoxes = true;
+            Console.SetOut(new ControlWriter(_ConsoleTextBox));
             AllowDrop = true;
 #pragma warning disable CS8622
             AppDomain.CurrentDomain.ProcessExit += Cleanup;
-            FormClosed += UpuGui_FormClosed;
+            FormClosing += UpuGui_FormClosed;
             DragEnter += Form1_DragEnter;
             DragDrop += Form1_DragDrop;
 #pragma warning restore CS8622
@@ -411,12 +412,19 @@ namespace UpuGui
             _btnSelectInputFile.Enabled = false;
             _progressBar.Visible = true;
             var backgroundWorker = new BackgroundWorker();
+            backgroundWorker.WorkerReportsProgress = true;
 #pragma warning disable CS8622
             backgroundWorker.DoWork += ReadInputFileWorker;
             backgroundWorker.RunWorkerCompleted += ReadInputFileWorkerCompleted;
+            backgroundWorker.ProgressChanged += backgroundWorker_ProgressChanged;
 #pragma warning restore CS8622
             _treeViewContents.Nodes.Clear();
             backgroundWorker.RunWorkerAsync(filePathName);
+        }
+        
+        private void backgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            _progressBar.Value = e.ProgressPercentage;
         }
 
         private void ReadInputFileWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -441,7 +449,7 @@ namespace UpuGui
             _btnExit.Enabled = true;
         }
         // iterate for the next person as a warning to not change what isn't broken
-        // time wasted on this method 5.4 hours
+        // time wasted on this method 7 hours
         private void ReadInputFileWorker(object sender, DoWorkEventArgs e)
         {
             try
@@ -451,13 +459,26 @@ namespace UpuGui
                 _unpacks.Add(_mTmpUnpackedOutputPathForUi);
                 _mRemapInfo = KissUnpacker.Unpack(e.Argument!.ToString(), _mTmpUnpackedOutputPathForUi, _mTmpUnpackedOutputPathForUi);
 
+                // Calculate the total number of files to process
+                var totalFiles = _mRemapInfo.Count;
+
+                // Initialize the progress counter
+                var filesProcessed = 0;
+                
                 // Create a dictionary to hold the parent nodes for each directory path
                 var directoryNodes = new Dictionary<string, TreeNode>();
+                var directorydict = new Dictionary<string, string>();
 
                 // Iterate over each file in the remap info and create a tree node for it
                 foreach (var keyValuePair in _mRemapInfo)
                 {
-                    if (!File.Exists(keyValuePair.Key)) continue;
+                    if (Directory.Exists(keyValuePair.Value))
+                    {
+                        if(string.IsNullOrEmpty(keyValuePair.Key)) continue;
+                        if(string.IsNullOrEmpty(keyValuePair.Value)) continue;
+                        directorydict.Add(keyValuePair.Key,keyValuePair.Value);
+                        continue;
+                    }
                     var relativePath = keyValuePair.Value.Replace(_mTmpUnpackedOutputPathForUi, "");
 
                     // Create a list of directory names in the relative path
@@ -479,13 +500,20 @@ namespace UpuGui
                         if (!directoryNodes.TryGetValue(directory, out var directoryNode))
                         {
                             // Create a new directory node and add it to the parent node
-                            directoryNode = new TreeNode(directory) { Checked = true};
+                            directoryNode = new TreeNode(directory) { Checked = true };
+                            foreach (var file in directorydict)
+                            {
+                                directoryNode.Tag = file;
+                            }
+                            Console.WriteLine(directoryNode.Tag);
+                            directorydict.Clear();
                             directoryNodes[directory] = directoryNode;
                             directoryNode.ImageIndex = 3;
                             directoryNode.SelectedImageIndex = 3;
                             if (parentNode == null)
                             {
                                 treeNodes.Add(directoryNode);
+                                // Console.WriteLine($"bitch boy tag: {directoryNode.Tag}");
                             }
                             else
                             {
@@ -663,6 +691,11 @@ namespace UpuGui
                     {
                         treeNodes.Add(fileNode);
                     }
+                    
+                    // Increment the progress counter and report the progress
+                    filesProcessed++;
+                    var progress = (int)(filesProcessed / (double)totalFiles * 100);
+                    (sender as BackgroundWorker)?.ReportProgress(progress);
                 }
 
                 // Set the result to the root nodes of the tree
@@ -744,7 +777,7 @@ namespace UpuGui
             }
         }
 
-        private void UpuGui_FormClosed(object sender, FormClosedEventArgs e)
+        private void UpuGui_FormClosed(object sender, FormClosingEventArgs e)
         {
             Cleanup(sender, e);
         }
@@ -856,25 +889,22 @@ namespace UpuGui
     
     public class ControlWriter : TextWriter
     {
-        private Control textbox;
+        private readonly Control _textbox;
         public ControlWriter(Control textbox)
         {
-            this.textbox = textbox;
+            _textbox = textbox;
         }
 
         public override void Write(char value)
         {
-            textbox.Text += value;
+            _textbox.Text += value;
         }
 
         public override void Write(string value)
         {
-            textbox.Text += value;
+            _textbox.Text += value;
         }
 
-        public override Encoding Encoding
-        {
-            get { return Encoding.ASCII; }
-        }
+        public override Encoding Encoding => Encoding.ASCII;
     }
 }
