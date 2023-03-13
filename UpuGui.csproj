@@ -12,9 +12,9 @@
         <PublishReadyToRun>true</PublishReadyToRun>
         <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
         <_SuppressWinFormsTrimError>true</_SuppressWinFormsTrimError>
-        <AssemblyVersion>1.6.2.0</AssemblyVersion>
-        <FileVersion>1.6.2.0</FileVersion>
-        <ProductVersion>1.6.2.0</ProductVersion>
+        <AssemblyVersion>1.6.3.0</AssemblyVersion>
+        <FileVersion>1.6.3.0</FileVersion>
+        <ProductVersion>1.6.3.0</ProductVersion>
         <Authors>Myrkur</Authors>
         <Copyright>Myrkur/Myrkie</Copyright>
         <IsPackable>false</IsPackable>
