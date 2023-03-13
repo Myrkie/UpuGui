@@ -22,6 +22,8 @@ namespace UpuGui.UpuConsole
         private bool Register { get; set; }
 
         private bool Unregister { get; set; }
+        
+        private bool Metadata { get; set; }
 
         internal int Start()
         {
@@ -31,8 +33,9 @@ namespace UpuGui.UpuConsole
                 { "i=|input=", "Unitypackage input file.", i => InputFile = i },
                 // ReSharper disable once StringLiteralTypo
                 { "o=|output=", "The output path of the extracted unitypackage.", o => OutputPath = o },
+                { "m|metadata", "Include metadata in extraction", m =>  Metadata = m != null },
                 { "r|register", "Register context menu handler", r => Register = r != null },
-                { "u|unregister", "Unregister context menu handler", u => Unregister = u != null },
+                { "u|unregister", "Unregister context menu handler", u => Unregister = u != null }
             };
             
             p.Add("h|help", "Show help", _ => Console.WriteLine(GetUsage(p)));
@@ -44,7 +47,7 @@ namespace UpuGui.UpuConsole
             }
             if (!string.IsNullOrEmpty(InputFile))
             {
-                DoUnpack(InputFile);
+                DoUnpack(InputFile, Metadata);
             }
             return (Register || Unregister) && !RegisterUnregisterShellHandler(Register) ? 1 : 0;
         }
@@ -122,14 +125,18 @@ namespace UpuGui.UpuConsole
                 // Set the file extension and verb for the shell handler
                 const string fileExtension = ".UnityPackage";
                 const string shellKeyName = "unpack";
+                const string shellKeyNameMetadata = "unpack metadata";
 
                 // If registering, call the RegisterShellHandler method to add the context menu entry
                 // with the specified text and command
                 if (register)
                 {
                     const string menuText = "Unpack here";
+                    const string menuTextMetadata = "Unpack here with metadata";
                     var command = $"\"{Environment.ProcessPath}\" \"--input=%L\"";
+                    var commandMetadata = $"\"{Environment.ProcessPath}\" \"--input=%L\" \"-m\"";
                     RegisterShellHandler(fileExtension, shellKeyName, menuText, command);
+                    RegisterShellHandler(fileExtension, shellKeyNameMetadata, menuTextMetadata, commandMetadata);
                 }
                 // If unregistering, call the UnregisterShellHandler method to remove the context menu entry
                 else
@@ -217,11 +224,11 @@ namespace UpuGui.UpuConsole
             return registryKey != null && registryKey.GetValue(null) != null;
         }
 
-        private void DoUnpack(string? fileName)
+        private void DoUnpack(string? fileName, bool metadata)
         {
             try
             {
-                KissUnpacker.RemapFiles(KissUnpacker.Unpack(fileName, OutputPath, null));
+                KissUnpacker.RemapFiles(KissUnpacker.Unpack(fileName, OutputPath, null), metadata);
                 if (KissUnpacker.TempPath != null) Directory.Delete(KissUnpacker.TempPath, true);
             }
             catch (Exception ex)

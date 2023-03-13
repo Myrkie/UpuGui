@@ -696,15 +696,11 @@ namespace UpuGui
                 if(treeNode.Tag == null) continue;
                 if (!treeNode.Checked) continue;
                 dictionary.Add(((KeyValuePair<string, string>)treeNode.Tag).Key, ((KeyValuePair<string, string>)treeNode.Tag).Value);
-                if (_exportmeta)
-                {
-                    dictionary.Add(((KeyValuePair<string, string>)treeNode.Tag).Key + ".meta", ((KeyValuePair<string, string>)treeNode.Tag).Value + ".meta");
-                }
             }
             foreach (var keyValuePair in dictionary)
                 map[keyValuePair.Key] = keyValuePair.Value.Replace(_mTmpUnpackedOutputPathForUi!,
                     _saveToFolderDialog.SelectedPath);
-            KissUnpacker.RemapFiles(map);
+            KissUnpacker.RemapFiles(map, _exportmeta);
         }
 
        static IEnumerable<TreeNode> Collect(TreeNodeCollection nodes)

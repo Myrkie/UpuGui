@@ -119,11 +119,28 @@ namespace UpuGui.UpuCore
             return remapInfo;
         }
 
-        public static void RemapFiles(Dictionary<string, string> map)
+        public static void RemapFiles(Dictionary<string, string> map, bool metadata)
         {
-            foreach (var (sourcePath, destinationPath) in map)
+            // creates temp dictionary
+            var tempdict = new Dictionary<string, string>();
+            
+            // if metadata extract is enabled iterate the original dictionary and add meta files 
+            if (metadata)
             {
-                // Extract values from the dictionary
+                foreach (var (sourcePath, destinationPath) in map)
+                {
+                    tempdict.Add(sourcePath, destinationPath);
+                    tempdict.Add(sourcePath + ".meta", destinationPath + ".meta");
+                }
+            }
+            else
+            {
+                tempdict = map;
+            }
+            
+            // Extract values from the dictionary
+            foreach (var (sourcePath, destinationPath) in tempdict)
+            {
 
                 // Create a FileInfo object to get the directory path
                 var fileInfo = new FileInfo(destinationPath);
