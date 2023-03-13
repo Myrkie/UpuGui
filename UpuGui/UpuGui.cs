@@ -481,6 +481,8 @@ namespace UpuGui
                             // Create a new directory node and add it to the parent node
                             directoryNode = new TreeNode(directory) { Checked = true};
                             directoryNodes[directory] = directoryNode;
+                            directoryNode.ImageIndex = 3;
+                            directoryNode.SelectedImageIndex = 3;
                             if (parentNode == null)
                             {
                                 treeNodes.Add(directoryNode);
@@ -497,7 +499,6 @@ namespace UpuGui
 
                     var text = keyValuePair.Value.Split('\\').Last();
                     var extension = text.Split('.').Last();
-                    Console.WriteLine($"Image extension result: {extension}");
 
                     // Create the file node and add it to the final parent node
                     var fileNode = new TreeNode(relativePath) { Checked = true, Tag = keyValuePair, Text = text };
