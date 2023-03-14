@@ -449,7 +449,7 @@ namespace UpuGui
             _btnExit.Enabled = true;
         }
         // iterate for the next person as a warning to not change what isn't broken
-        // time wasted on this method 7 hours
+        // time wasted on this method 7.2 hours
         private void ReadInputFileWorker(object sender, DoWorkEventArgs e)
         {
             try
@@ -472,7 +472,7 @@ namespace UpuGui
                 // Iterate over each file in the remap info and create a tree node for it
                 foreach (var keyValuePair in _mRemapInfo)
                 {
-                    if (Directory.Exists(keyValuePair.Value))
+                    if (!File.Exists(keyValuePair.Key))
                     {
                         if(string.IsNullOrEmpty(keyValuePair.Key)) continue;
                         if(string.IsNullOrEmpty(keyValuePair.Value)) continue;
@@ -505,7 +505,6 @@ namespace UpuGui
                             {
                                 directoryNode.Tag = file;
                             }
-                            Console.WriteLine(directoryNode.Tag);
                             directorydict.Clear();
                             directoryNodes[directory] = directoryNode;
                             directoryNode.ImageIndex = 3;
@@ -513,7 +512,6 @@ namespace UpuGui
                             if (parentNode == null)
                             {
                                 treeNodes.Add(directoryNode);
-                                // Console.WriteLine($"bitch boy tag: {directoryNode.Tag}");
                             }
                             else
                             {
@@ -524,7 +522,6 @@ namespace UpuGui
                         // Set the current directory node as the parent for the next directory node
                         parentNode = directoryNode;
                     }
-
                     var text = keyValuePair.Value.Split('\\').Last();
                     var extension = text.Split('.').Last();
 
