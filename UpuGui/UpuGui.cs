@@ -491,7 +491,7 @@ namespace UpuGui
 
                     // Initialize the parent node to null
                     TreeNode? parentNode = null;
-
+                    // todo fix this method, currently it doesnt append the tag to the directory node so it doesnt properly export the metadata
                     // Traverse the list of directory names and create nodes for them
                     foreach (var directory in directories)
                     {
