@@ -101,7 +101,6 @@ namespace UpuGui
             _btnRegisterUnregister = new Button();
             _ConsoleTextBox = new RichTextBox();
             imageList = new ImageList(components);
-            Console.SetOut(new ControlWriter(_ConsoleTextBox));
             _groupBox.SuspendLayout();
             SuspendLayout();
             // 

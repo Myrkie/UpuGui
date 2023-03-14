@@ -13,7 +13,7 @@ What's working already?
 
 1. You can extract the whole unity package to a defined directory, or the same directory where the package resides in.
 2. Add/Remove Windows Explorer context menu handlers for *.unitypackage files.
-
+3. fully functional file hierarchy
 Usage
 ---
 UpuGui.exe [options]
@@ -33,6 +33,11 @@ Todos
 ---
 
 1. optimized decompiled code.
+
+
+KnownBugs
+---
+1. GUI doesnt export all metadata files properly, current fix is to use the right-click context export with metadata
 
 Download
 ---
