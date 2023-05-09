@@ -105,7 +105,14 @@ namespace UpuGui.UpuCore
             // Loop through each subdirectory in the extracted content directory
             foreach (var directory in new DirectoryInfo(extractedContentPath).GetDirectories())
             {
+                // checks to make sure files exist in case of modified files
+                if (!File.Exists(Path.Combine(directory.FullName, "pathname")))
+                {
+                    Console.WriteLine("Package has been modified proceed with caution");
+                    continue;
+                }
                 // Read the "pathname" file to get the path to the file within the Unity project
+
                 var path = File.ReadAllLines(Path.Combine(directory.FullName, "pathname"))[0].Replace('/',
                     Path.DirectorySeparatorChar);
 
