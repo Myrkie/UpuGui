@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net7.0-windows</TargetFramework>
+        <TargetFramework>net8.0-windows</TargetFramework>
         <RootNamespace>UpuGui</RootNamespace>
         <Nullable>enable</Nullable>
         <UseWindowsForms>true</UseWindowsForms>
@@ -12,13 +12,14 @@
         <PublishReadyToRun>true</PublishReadyToRun>
         <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
         <_SuppressWinFormsTrimError>true</_SuppressWinFormsTrimError>
-        <AssemblyVersion>1.6.4.0</AssemblyVersion>
-        <FileVersion>1.6.4.0</FileVersion>
-        <ProductVersion>1.6.4.0</ProductVersion>
+        <AssemblyVersion>1.6.5.0</AssemblyVersion>
+        <FileVersion>1.6.5.0</FileVersion>
+        <ProductVersion>1.6.5.0</ProductVersion>
         <Authors>Myrkur</Authors>
         <Copyright>Myrkur/Myrkie</Copyright>
         <IsPackable>false</IsPackable>
         <ApplicationIcon>Icons\70px\icons8-archive-folder-70.ico</ApplicationIcon>
+        <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     </PropertyGroup>
 
     <ItemGroup>

@@ -5,7 +5,7 @@ This little Windows tool helps you to unpack Unity Packages from [Unity 3D](http
 
 It also can add a context menu handler for the Windows Explorer which makes extraction of the files a lot easier.
 
-##UPU GUI
+## UPU GUI
 
 
 What's working already?
@@ -13,7 +13,7 @@ What's working already?
 
 1. You can extract the whole unity package to a defined directory, or the same directory where the package resides in.
 2. Add/Remove Windows Explorer context menu handlers for *.unitypackage files.
-3. fully functional file hierarchy
+
 Usage
 ---
 UpuGui.exe [options]
@@ -37,14 +37,13 @@ Todos
 
 KnownBugs
 ---
-1. GUI doesnt export all metadata files properly, current fix is to use the right-click context export with metadata
+1. GUI doesn't export all metadata files properly, current fix is to use the right-click context export with metadata
+2. Selecting nodes will not work properly, it should only be used as a overview of the file hierarchy
 
 Download
 ---
 Latest Version: https://github.com/Myrkie/UpuGui/releases
 
-Search Engine Keywords:
-unity3d, unitypackage, unpack, extract, deflate, assets, UPUGui
 
 
 ## Build Instructions ##
@@ -59,3 +58,7 @@ Debug
 ```text
 dotnet publish -c Debug -o publish -p:PublishReadyToRun=true -p:PublishSingleFile=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=Full -p:DebugSymbols=true
 ```
+
+
+Search Engine Keywords:
+unity3d, unitypackage, unpack, extract, deflate, assets, UPUGui
