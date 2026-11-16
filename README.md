@@ -1,3 +1,6 @@
+This repository has been archived in favor of its Avalonia cross platform [rewrite](https://github.com/Myrkie/UpuGuiAvalonia)
+
+
 UPU - .unityPackage unpacker GUI and CLI Tool
 ===
 
